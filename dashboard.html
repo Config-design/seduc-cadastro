@@ -82,7 +82,7 @@ td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
     <div class="link-box" id="linkBox">https://config-design.github.io/seduc-cadastro/cadastro.html</div>
     <div class="link-actions">
       <button class="btn-copy" id="btnCopy" onclick="doCopy()">&#128203; Copiar link</button>
-      <button class="btn-ref" onclick="loadData()">&#8635; Atualizar</button>
+      <button class="btn-ref" id="btnRef" onclick="loadData()">&#8635; Atualizar</button>
     </div>
     <div class="cfb" id="cfb"></div>
   </div>
@@ -140,20 +140,28 @@ function tOrig(t){if(t==='ja_tinha_email')return '<span class="tag ts">Ja tinha<
 function tSt(r){return r.statusTipo==='convertido'?'<span class="tag tc">Convertido</span>':'<span class="tag tp">Pendente</span>';}
 
 function loadData(){
-  var cb='cb'+Date.now();
-  window[cb]=function(dados){
-    delete window[cb];
-    var s=document.getElementById('jsonp_script');
+  var btn=document.getElementById('btnRef');
+  if(btn){btn.textContent='Carregando...';btn.style.background='#D97706';}
+  
+  var old=document.getElementById('_jsonp');
+  if(old)old.parentNode.removeChild(old);
+  
+  var cbName='_cb'+Date.now();
+  window[cbName]=function(dados){
+    try{delete window[cbName];}catch(e){}
+    var s=document.getElementById('_jsonp');
     if(s)s.parentNode.removeChild(s);
     renderTables(dados.cadastros||[],dados.sem_email||[]);
+    if(btn){btn.textContent='Atualizar';btn.style.background='';}
   };
+  
   var s=document.createElement('script');
-  s.id='jsonp_script';
-  s.src=SURL+'?callback='+cb+'&t='+Date.now();
+  s.id='_jsonp';
+  s.src=SURL+'?callback='+cbName+'&t='+Date.now();
   s.onerror=function(){
-    delete window[cb];
-    document.getElementById('bCad').innerHTML='<tr><td colspan="8"><div class="empty">&#9888; Erro ao carregar. Clique em Atualizar.</div></td></tr>';
-    document.getElementById('bSem').innerHTML='<tr><td colspan="5"><div class="empty">&#9888; Erro ao carregar.</div></td></tr>';
+    try{delete window[cbName];}catch(e){}
+    if(btn){btn.textContent='Erro - Tentar novamente';btn.style.background='#DC2626';}
+    setTimeout(function(){if(btn){btn.textContent='Atualizar';btn.style.background='';}},3000);
   };
   document.head.appendChild(s);
 }
