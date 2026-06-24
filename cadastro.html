@@ -170,10 +170,42 @@ function irS2(){
   showStep('s2','d','on','','d','');
 }
 function enviar(reg, callback) {
-  var url = SURL + '?d=' + encodeURIComponent(JSON.stringify(reg));
-  fetch(url, {method:'GET'})
-    .then(function(){callback(true);})
-    .catch(function(){callback(false);});
+  var cbName = '_send'+Date.now();
+  var done = false;
+  
+  window[cbName] = function(res) {
+    done = true;
+    try{delete window[cbName];}catch(e){}
+    var s = document.getElementById('_send_script');
+    if(s) s.parentNode.removeChild(s);
+    callback(true);
+  };
+  
+  var timeout = setTimeout(function(){
+    if(!done){
+      done = true;
+      try{delete window[cbName];}catch(e){}
+      var s = document.getElementById('_send_script');
+      if(s) s.parentNode.removeChild(s);
+      callback(false);
+    }
+  }, 10000);
+  
+  var old = document.getElementById('_send_script');
+  if(old) old.parentNode.removeChild(old);
+  
+  var s = document.createElement('script');
+  s.id = '_send_script';
+  s.src = SURL + '?callback=' + cbName + '&d=' + encodeURIComponent(JSON.stringify(reg));
+  s.onerror = function(){
+    if(!done){
+      done = true;
+      clearTimeout(timeout);
+      try{delete window[cbName];}catch(e){}
+      callback(false);
+    }
+  };
+  document.head.appendChild(s);
 }
 function escolha(op){
   fluxo=op;
