@@ -30,7 +30,7 @@ body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--text);
 .link-panel{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
 .lph{font-size:14px;font-weight:700;margin-bottom:4px;}
 .lpd{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;}
-.link-box{background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:12px 14px;font-size:12px;color:var(--brand);word-break:break-all;line-height:1.5;font-weight:500;margin-bottom:10px;user-select:all;}
+.link-box{background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:12px 14px;font-size:12px;color:var(--brand);word-break:break-all;line-height:1.5;font-weight:500;margin-bottom:10px;}
 .link-actions{display:flex;gap:8px;}
 .btn-copy{flex:1;background:var(--brand);color:white;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background .15s;}
 .btn-copy.ok{background:var(--success);}
@@ -43,7 +43,7 @@ body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--text);
 .badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;color:white;}
 .bg{background:var(--success);}.bw{background:var(--warn);}
 .acts{display:flex;gap:6px;}
-.btn-exp{background:var(--success);color:white;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;}
+.btn-exp{background:var(--success);color:white;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
 .btn-del{background:#FEF2F2;color:var(--danger);border:1.5px solid #FECACA;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 table{width:100%;border-collapse:collapse;font-size:12px;}
@@ -79,7 +79,7 @@ td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
   <div class="link-panel">
     <div class="lph">&#128279; Link para enviar via WhatsApp</div>
     <div class="lpd">Copie o link abaixo e envie para as pessoas. Quando preencherem, os dados aparecem aqui.</div>
-    <div class="link-box" id="linkBox">Carregando...</div>
+    <div class="link-box" id="linkBox">https://config-design.github.io/seduc-cadastro/cadastro.html</div>
     <div class="link-actions">
       <button class="btn-copy" id="btnCopy" onclick="doCopy()">&#128203; Copiar link</button>
       <button class="btn-ref" onclick="loadData()">&#8635; Atualizar</button>
@@ -114,18 +114,10 @@ td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
   </div>
 </div>
 <script>
-var SHEET_URL='https://script.google.com/macros/s/SEU_SCRIPT_ID/exec';
-var cadLink='';
-
-function initLink(){
-  var url=window.location.href;
-  var base=url.substring(0,url.lastIndexOf('/')+1);
-  cadLink=base+'cadastro.html';
-  document.getElementById('linkBox').textContent=cadLink;
-}
+var SURL='https://script.google.com/macros/s/AKfycbwFJC2kXIh9QGi3TfokE_ZjDV02uuBHLcSxRnQ8Ekr5fJml2b5pMS2GwyeD0UwsnsFuQw/exec';
+var cadLink='https://config-design.github.io/seduc-cadastro/cadastro.html';
 
 function doCopy(){
-  if(!cadLink){showFb('er','Link nao disponivel.');return;}
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(cadLink).then(function(){copiado();}).catch(function(){fallback();});
   } else {fallback();}
@@ -133,7 +125,7 @@ function doCopy(){
 function fallback(){
   var ta=document.createElement('textarea');ta.value=cadLink;ta.style.cssText='position:fixed;opacity:0;top:0;left:0;width:1px;height:1px;';
   document.body.appendChild(ta);ta.focus();ta.select();
-  try{document.execCommand('copy');copiado();}catch(e){showFb('er','Selecione o link acima e copie manualmente.');}
+  try{document.execCommand('copy');copiado();}catch(e){showFb('er','Selecione o link e copie manualmente.');}
   document.body.removeChild(ta);
 }
 function copiado(){
@@ -142,23 +134,28 @@ function copiado(){
   setTimeout(function(){b.textContent='Copiar link';b.classList.remove('ok');},3000);
 }
 function showFb(cls,msg){var el=document.getElementById('cfb');el.className='cfb '+cls;el.textContent=msg;setTimeout(function(){el.textContent='';el.className='cfb';},4000);}
-
 function fmt(iso){try{return new Date(iso).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});}catch(e){return iso;}}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function tOrig(t){if(t==='ja_tinha_email')return '<span class="tag ts">Ja tinha</span>';if(t==='criou_e_voltou')return '<span class="tag tv">Criou e voltou</span>';return t;}
 function tSt(r){return r.statusTipo==='convertido'?'<span class="tag tc">Convertido</span>':'<span class="tag tp">Pendente</span>';}
 
-async function loadData(){
-  try{
-    var resp=await fetch(SHEET_URL+'?action=get');
-    var dados=await resp.json();
-    var cads=dados.cadastros||[];
-    var sems=dados.sem_email||[];
-    renderTables(cads,sems);
-  }catch(e){
+function loadData(){
+  var cb='cb'+Date.now();
+  window[cb]=function(dados){
+    delete window[cb];
+    var s=document.getElementById('jsonp_script');
+    if(s)s.parentNode.removeChild(s);
+    renderTables(dados.cadastros||[],dados.sem_email||[]);
+  };
+  var s=document.createElement('script');
+  s.id='jsonp_script';
+  s.src=SURL+'?callback='+cb+'&t='+Date.now();
+  s.onerror=function(){
+    delete window[cb];
     document.getElementById('bCad').innerHTML='<tr><td colspan="8"><div class="empty">&#9888; Erro ao carregar. Clique em Atualizar.</div></td></tr>';
     document.getElementById('bSem').innerHTML='<tr><td colspan="5"><div class="empty">&#9888; Erro ao carregar.</div></td></tr>';
-  }
+  };
+  document.head.appendChild(s);
 }
 
 function renderTables(cads,sems){
@@ -181,7 +178,7 @@ function renderTables(cads,sems){
 }
 
 function doExp(tipo){
-  fetch(SHEET_URL+'?action=get').then(function(r){return r.json();}).then(function(dados){
+  fetch(SURL+'?action=get&t='+Date.now()).then(function(r){return r.json();}).then(function(dados){
     var lista=tipo==='cadastros'?(dados.cadastros||[]):(dados.sem_email||[]);
     if(!lista.length){alert('Nenhum dado para exportar.');return;}
     var headers,rows=[];
@@ -200,11 +197,10 @@ function doExp(tipo){
 
 function doDel(tipo){
   if(!confirm('Apagar todos os registros de "'+tipo+'"? Nao sera possivel recuperar.'))return;
-  fetch(SHEET_URL,{method:'POST',body:JSON.stringify({action:'delete',tipo:tipo})})
+  fetch(SURL,{method:'POST',body:JSON.stringify({action:'delete',tipo:tipo})})
     .then(function(){loadData();}).catch(function(){alert('Erro ao limpar.');});
 }
 
-initLink();
 loadData();
 setInterval(loadData,15000);
 </script>
