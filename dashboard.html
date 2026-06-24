@@ -167,6 +167,8 @@ function loadData(){
 }
 
 function renderTables(cads,sems){
+  var btn=document.getElementById('btnRef');
+  if(btn){btn.textContent='Atualizar';btn.style.background='';}
   var sim=0,volt=0,pend=0;
   for(var i=0;i<cads.length;i++){if(cads[i].tipo==='ja_tinha_email')sim++;else if(cads[i].tipo==='criou_e_voltou')volt++;}
   for(var i=0;i<sems.length;i++){if(sems[i].statusTipo!=='convertido')pend++;}
@@ -210,7 +212,7 @@ function doDel(tipo){
 }
 
 loadData();
-setInterval(loadData,15000);
+setInterval(loadData,10000);
 </script>
 </body>
 </html>

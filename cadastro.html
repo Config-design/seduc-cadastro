@@ -189,7 +189,7 @@ function enviar(reg, callback) {
       if(s) s.parentNode.removeChild(s);
       callback(false);
     }
-  }, 10000);
+  }, 30000);
   
   var old = document.getElementById('_send_script');
   if(old) old.parentNode.removeChild(old);
@@ -225,18 +225,12 @@ function finalizar(){
     {id:'cep',eid:'e-cep',fn:function(v){return /^\d{5}-\d{3}$/.test(v);}}
   ]))return;
   document.getElementById('btnFin').disabled=true;
-  showStep('sload','d','d','on','d','d');
   var reg={tipo:fluxo==='voltou'?'criou_e_voltou':'ja_tinha_email',nome:di.nome,escola:di.escola,cargo:di.cargo,cpf:document.getElementById('cpf').value.trim(),email:document.getElementById('email').value.trim(),cep:document.getElementById('cep').value.trim(),dataHora:new Date().toISOString()};
-  enviar(reg,function(ok){
-    if(ok){
-      document.getElementById('resumo').innerHTML='<strong>Resumo:</strong><br/>Nome: '+reg.nome+'<br/>Escola: '+reg.escola+'<br/>Cargo: '+reg.cargo+'<br/>E-mail: '+reg.email+'<br/>CPF: '+reg.cpf+'<br/>CEP: '+reg.cep;
-      showStep('s4','d','d','d','d','d');
-    } else {
-      document.getElementById('btnFin').disabled=false;
-      showStep('s3b','d','d','on','d','d');
-      alert('Erro de conexao. Tente novamente.');
-    }
-  });
+  /* Mostra sucesso imediatamente e salva em background */
+  document.getElementById('resumo').innerHTML='<strong>Resumo:</strong><br/>Nome: '+reg.nome+'<br/>Escola: '+reg.escola+'<br/>Cargo: '+reg.cargo+'<br/>E-mail: '+reg.email+'<br/>CPF: '+reg.cpf+'<br/>CEP: '+reg.cep;
+  showStep('s4','d','d','d','d','d');
+  /* Salva no background */
+  enviar(reg,function(){});
 }
 function mCPF(i){var v=i.value.replace(/\D/g,'').slice(0,11);if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');i.value=v;}
 function mCEP(i){var v=i.value.replace(/\D/g,'').slice(0,8);if(v.length>5)v=v.replace(/(\d{5})(\d{1,3})/,'$1-$2');i.value=v;}
