@@ -87,7 +87,7 @@ td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
       <div class="acts"><button class="btn-exp" onclick="doExp('cadastros')">&#11015; Excel</button><button class="btn-del" onclick="doDel('cadastros')">Limpar</button></div>
     </div>
     <div class="tw"><table>
-      <thead><tr><th>Nome</th><th>Escola</th><th>Cargo</th><th>E-mail</th><th>CPF</th><th>CEP</th><th>Origem</th><th>Data/Hora</th></tr></thead>
+      <thead><tr><th>Nome</th><th>Escola</th><th>Cargo</th><th>E-mail Inst.</th><th>E-mail Pessoal</th><th>CPF</th><th>CEP</th><th>Status</th><th>Acoes</th><th>Data/Hora</th></tr></thead>
       <tbody id="bCad"><tr><td colspan="8"><div class="empty"><span class="spinner"></span>Carregando...</div></td></tr></tbody>
     </table></div>
   </div>
@@ -162,7 +162,10 @@ function renderTables(cads,sems){
   document.getElementById('bS').textContent=sems.length;
   var bc=document.getElementById('bCad');
   if(!cads.length){bc.innerHTML='<tr><td colspan="8"><div class="empty">&#128235; Nenhum cadastro ainda.</div></td></tr>';}
-  else{var r='';for(var i=cads.length-1;i>=0;i--){var c=cads[i];r+='<tr><td><strong>'+esc(c.nome)+'</strong></td><td>'+esc(c.escola)+'</td><td>'+esc(c.cargo)+'</td><td>'+esc(c.email)+'</td><td>'+esc(c.cpf)+'</td><td>'+esc(c.cep)+'</td><td>'+tOrig(c.tipo)+'</td><td>'+fmt(c.dataHora)+'</td></tr>';}bc.innerHTML=r;}
+  else{var r='';for(var i=cads.length-1;i>=0;i--){var c=cads[i];
+    var stTag=c.status==='concluido'?'<span style="background:#F0FDF4;color:#16A34A;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-block;">Liberado</span>':'<span style="background:#FFFBEB;color:#D97706;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-block;">Aguardando</span>';
+    var btnA=c.status==='concluido'?'':('<button onclick="mc(this,'+JSON.stringify(c.id)+','+JSON.stringify(c.nome)+')" style="background:#1B4F9B;color:white;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">Liberar</button>');
+    r+='<tr><td><strong>'+esc(c.nome)+'</strong></td><td>'+esc(c.escola)+'</td><td>'+esc(c.cargo)+'</td><td>'+esc(c.email)+'</td><td>'+esc(c.emailPessoal||'-')+'</td><td>'+esc(c.cpf)+'</td><td>'+esc(c.cep)+'</td><td>'+stTag+'</td><td>'+btnA+'</td><td>'+fmt(c.dataHora)+'</td></tr>';}bc.innerHTML=r;}
   var bs=document.getElementById('bSem');
   if(!sems.length){bs.innerHTML='<tr><td colspan="5"><div class="empty">&#9989; Nenhum usuario sem e-mail.</div></td></tr>';}
   else{var r2='';for(var i=sems.length-1;i>=0;i--){var s2=sems[i];r2+='<tr><td><strong>'+esc(s2.nome)+'</strong></td><td>'+esc(s2.escola)+'</td><td>'+esc(s2.cargo)+'</td><td>'+tSt(s2)+'</td><td>'+fmt(s2.dataHora)+'</td></tr>';}bs.innerHTML=r2;}
@@ -191,6 +194,20 @@ function doExp(tipo){
   document.head.appendChild(s);
 }
 
+function mc(btn,id,nome){
+  if(!confirm('Marcar acesso de "'+nome+'" como liberado?'))return;
+  btn.textContent='Salvando...';btn.disabled=true;
+  var dados={action:'status',id:id,status:'concluido'};
+  fetch(SURL+'?t='+Date.now()+'&d='+encodeURIComponent(JSON.stringify(dados)),{method:'GET',redirect:'follow'})
+    .then(function(){setTimeout(loadData,1500);})
+    .catch(function(){
+      var cb='_mc'+Date.now();
+      window[cb]=function(){try{delete window[cb];}catch(e){}setTimeout(loadData,1500);};
+      var s=document.createElement('script');
+      s.src=SURL+'?callback='+cb+'&d='+encodeURIComponent(JSON.stringify(dados));
+      document.head.appendChild(s);
+    });
+}
 function doDel(tipo){
   if(!confirm('Apagar todos os registros de "'+tipo+'"? Nao sera possivel recuperar.'))return;
   fetch(SURL+'?t='+Date.now()+'&d='+encodeURIComponent(JSON.stringify({action:'delete',tipo:tipo})),{method:'GET',redirect:'follow'})
