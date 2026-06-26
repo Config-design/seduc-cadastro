@@ -359,20 +359,56 @@ function finalizar(){
 
 function enviar(dados, cb, tentativa){
   tentativa = tentativa || 1;
-  fetch(SURL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type': 'text/plain'},
-    body: JSON.stringify(dados)
-  })
-  .then(function(){ cb(true); })
-  .catch(function(){
-    if(tentativa < 3){
-      setTimeout(function(){ enviar(dados, cb, tentativa+1); }, 2000);
-    } else {
-      cb(false);
+  // Cria iframe oculto como alvo do POST (contorna CORS do Apps Script)
+  var iframeId = '_postframe_' + Date.now();
+  var formId = '_postform_' + Date.now();
+  var iframe = document.createElement('iframe');
+  iframe.name = iframeId;
+  iframe.id = iframeId;
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+
+  var form = document.createElement('form');
+  form.method = 'POST';
+  form.action = SURL;
+  form.target = iframeId;
+  form.style.display = 'none';
+
+  var input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'dados';
+  input.value = JSON.stringify(dados);
+  form.appendChild(input);
+  document.body.appendChild(form);
+
+  var done = false;
+  var timer = setTimeout(function(){
+    if(!done){
+      done = true;
+      cleanup();
+      if(tentativa < 3){
+        setTimeout(function(){ enviar(dados, cb, tentativa+1); }, 1500);
+      } else {
+        cb(false);
+      }
     }
-  });
+  }, 20000);
+
+  iframe.onload = function(){
+    if(!done){
+      done = true;
+      clearTimeout(timer);
+      cleanup();
+      cb(true);
+    }
+  };
+
+  function cleanup(){
+    try{ document.body.removeChild(form); }catch(e){}
+    setTimeout(function(){ try{ document.body.removeChild(iframe); }catch(e){} }, 500);
+  }
+
+  form.submit();
 }
 
 function verificar(){
