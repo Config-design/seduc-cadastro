@@ -351,8 +351,26 @@ function finalizar(){
       showStep('s4','d','d','d','d','d');
     } else {
       document.getElementById('btnFin').disabled=false;
-      showStep('s3b','d','d','on','d','d');
-      alert('Erro ao enviar. Verifique sua conexao e tente novamente.');
+      showStep('sload','d','d','on','d','d');
+      setTimeout(function(){{
+        showStep('s3b','d','d','on','d','d');
+      }}, 500);
+      setTimeout(function(){{
+        var reg2={
+          id:reg.id,tipo:reg.tipo,nome:reg.nome,escola:reg.escola,cargo:reg.cargo,
+          cpf:reg.cpf,email:reg.email,cep:reg.cep,status:reg.status,dataHora:reg.dataHora
+        };
+        enviarJSONP(reg2,function(ok2){{
+          if(ok2){{
+            document.getElementById('resumo').innerHTML='<strong>Resumo:</strong><br/>Nome: '+reg2.nome+'<br/>Escola: '+reg2.escola+'<br/>Cargo: '+reg2.cargo+'<br/>E-mail: '+reg2.email+'<br/>CPF: '+reg2.cpf+'<br/>CEP: '+reg2.cep;
+            showStep('s4','d','d','d','d','d');
+          }} else {{
+            document.getElementById('btnFin').disabled=false;
+            showStep('s3b','d','d','on','d','d');
+            alert('Erro ao enviar. Verifique sua conexao e tente novamente.');
+          }}
+        }});
+      }}, 2000);
     }
   });
 }
@@ -362,7 +380,7 @@ function enviarJSONP(dados, cb){
   var done=false;
   var timer=setTimeout(function(){
     if(!done){done=true;try{delete window[name];}catch(e){}cb(false);}
-  },30000);
+  },45000);
   window[name]=function(){
     if(done)return;done=true;clearTimeout(timer);
     try{delete window[name];}catch(e){}
@@ -370,7 +388,8 @@ function enviarJSONP(dados, cb){
   };
   var old=document.getElementById('_jsend');if(old)old.parentNode.removeChild(old);
   var s=document.createElement('script');s.id='_jsend';
-  s.src=SURL+'?callback='+name+'&d='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
+  var jstr=JSON.stringify(dados);
+  s.src=SURL+'?callback='+name+'&d='+encodeURIComponent(jstr)+'&t='+Date.now();
   s.onerror=function(){if(!done){done=true;clearTimeout(timer);try{delete window[name];}catch(e){}cb(false);}};
   document.head.appendChild(s);
 }
