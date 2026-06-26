@@ -271,7 +271,7 @@ select.sel.err{border-color:#EF4444;}
 </div>
 <script>
 var SURL='https://script.google.com/macros/s/AKfycbwFJC2kXIh9QGi3TfokE_ZjDV02uuBHLcSxRnQ8Ekr5fJml2b5pMS2GwyeD0UwsnsFuQw/exec';
-var fluxo=null, di={};
+var fluxo=null,di={};
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 
@@ -284,14 +284,20 @@ function setProg(c1,c2,c3,l1,l2){
     if(cs[i]==='d'){el.classList.add('done');el.textContent='ok';}
   }
   var ls=[l1,l2];
-  for(var i=0;i<2;i++){var el=document.getElementById('pl'+(i+1));el.className='pl';if(ls[i]==='d')el.classList.add('done');}
+  for(var i=0;i<2;i++){
+    var el=document.getElementById('pl'+(i+1));
+    el.className='pl';
+    if(ls[i]==='d')el.classList.add('done');
+  }
 }
+
 function showStep(id,c1,c2,c3,l1,l2){
   document.querySelectorAll('.step').forEach(function(s){s.classList.remove('active');});
   document.getElementById(id).classList.add('active');
   setProg(c1,c2,c3,l1,l2);
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
 function chk(campos){
   var ok=true;
   campos.forEach(function(c){
@@ -304,27 +310,36 @@ function chk(campos){
 }
 
 function goS1(){showStep('s1','on','','','','');}
+
 function goS2(){
   if(!chk([
     {id:'nome',eid:'e-nome',fn:function(v){return v.trim().length>=3;}},
     {id:'escola',eid:'e-escola',fn:function(v){return v.trim().length>=2;}},
     {id:'cargo',eid:'e-cargo',fn:function(v){return v.trim().length>=2;}}
   ]))return;
-  di={nome:document.getElementById('nome').value.trim(),escola:document.getElementById('escola').value.trim(),cargo:document.getElementById('cargo').value.trim()};
+  di={
+    nome:document.getElementById('nome').value.trim(),
+    escola:document.getElementById('escola').value.trim(),
+    cargo:document.getElementById('cargo').value.trim()
+  };
   showStep('s2','d','on','','d','');
 }
+
 function goVerif(){showStep('sverif','on','','','','');}
 
 function escolha(op){
   fluxo=op;
   if(op==='nao'){
     showStep('sload','d','d','on','d','d');
-    var reg={tipo:'sem_email',nome:di.nome,escola:di.escola,cargo:di.cargo,status:'Aguardando criacao de e-mail',statusTipo:'pendente',dataHora:new Date().toISOString()};
-    enviar(reg,function(ok){showStep('s3a','d','d','on','d','d');});
+    var reg={tipo:'sem_email',nome:di.nome,escola:di.escola,cargo:di.cargo,
+             status:'Aguardando criacao de e-mail',statusTipo:'pendente',
+             dataHora:new Date().toISOString()};
+    enviarGET(reg,function(ok){showStep('s3a','d','d','on','d','d');});
   } else {
     showStep('s3b','d','d','on','d','d');
   }
 }
+
 function voltou(){fluxo='voltou';showStep('s3b','d','d','on','d','d');}
 
 function finalizar(){
@@ -345,9 +360,12 @@ function finalizar(){
     status:'aguardando',
     dataHora:new Date().toISOString()
   };
-  enviar(reg,function(ok){
+  enviarGET(reg,function(ok){
     if(ok){
-      document.getElementById('resumo').innerHTML='<strong>Resumo:</strong><br/>Nome: '+reg.nome+'<br/>Escola: '+reg.escola+'<br/>Cargo: '+reg.cargo+'<br/>E-mail: '+reg.email+'<br/>CPF: '+reg.cpf+'<br/>CEP: '+reg.cep;
+      document.getElementById('resumo').innerHTML=
+        '<strong>Resumo:</strong><br/>Nome: '+reg.nome+
+        '<br/>Escola: '+reg.escola+'<br/>Cargo: '+reg.cargo+
+        '<br/>E-mail: '+reg.email+'<br/>CPF: '+reg.cpf+'<br/>CEP: '+reg.cep;
       showStep('s4','d','d','d','d','d');
     } else {
       document.getElementById('btnFin').disabled=false;
@@ -357,72 +375,83 @@ function finalizar(){
   });
 }
 
-function enviar(dados, cb, tentativa){
+// Envia dados via GET usando tag <script> — mesmo mecanismo do JSONP
+// O Apps Script recebe via e.parameter.dados, salva e retorna callback(resultado)
+function enviarGET(dados, cb, tentativa){
   tentativa = tentativa || 1;
-  // Cria iframe oculto como alvo do POST (contorna CORS do Apps Script)
-  var iframeId = '_postframe_' + Date.now();
-  var formId = '_postform_' + Date.now();
-  var iframe = document.createElement('iframe');
-  iframe.name = iframeId;
-  iframe.id = iframeId;
-  iframe.style.display = 'none';
-  document.body.appendChild(iframe);
-
-  var form = document.createElement('form');
-  form.method = 'POST';
-  form.action = SURL;
-  form.target = iframeId;
-  form.style.display = 'none';
-
-  var input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = 'dados';
-  input.value = JSON.stringify(dados);
-  form.appendChild(input);
-  document.body.appendChild(form);
-
+  var cbName = '_sv' + Date.now() + '_' + tentativa;
   var done = false;
+
   var timer = setTimeout(function(){
     if(!done){
       done = true;
-      cleanup();
+      limpar(cbName);
       if(tentativa < 3){
-        setTimeout(function(){ enviar(dados, cb, tentativa+1); }, 1500);
+        setTimeout(function(){ enviarGET(dados, cb, tentativa+1); }, 3000);
       } else {
         cb(false);
       }
     }
-  }, 20000);
+  }, 30000);
 
-  iframe.onload = function(){
+  window[cbName] = function(res){
     if(!done){
       done = true;
       clearTimeout(timer);
-      cleanup();
+      limpar(cbName);
       cb(true);
     }
   };
 
-  function cleanup(){
-    try{ document.body.removeChild(form); }catch(e){}
-    setTimeout(function(){ try{ document.body.removeChild(iframe); }catch(e){} }, 500);
-  }
+  var s = document.createElement('script');
+  s.id = cbName;
+  s.src = SURL
+    + '?callback=' + cbName
+    + '&dados=' + encodeURIComponent(JSON.stringify(dados))
+    + '&t=' + Date.now();
 
-  form.submit();
+  s.onerror = function(){
+    if(!done){
+      done = true;
+      clearTimeout(timer);
+      limpar(cbName);
+      if(tentativa < 3){
+        setTimeout(function(){ enviarGET(dados, cb, tentativa+1); }, 3000);
+      } else {
+        cb(false);
+      }
+    }
+  };
+
+  document.head.appendChild(s);
 }
 
+function limpar(id){
+  try{ delete window[id]; }catch(e){}
+  var el = document.getElementById(id);
+  if(el) el.parentNode.removeChild(el);
+}
+
+// Verifica status por CPF (usa GET/JSONP igual ao envio)
 function verificar(){
-  var cpf=document.getElementById('cpf_v').value.trim();
-  if(!valCPF(cpf)){document.getElementById('res_verif').innerHTML='<div style="color:#EF4444;font-size:13px;">CPF invalido.</div>';return;}
+  var cpf = document.getElementById('cpf_v').value.trim();
+  if(!valCPF(cpf)){
+    document.getElementById('res_verif').innerHTML='<div style="color:#EF4444;font-size:13px;">CPF invalido.</div>';
+    return;
+  }
   document.getElementById('res_verif').innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;">Consultando...</div>';
-  var name='_ver'+Date.now();
-  window[name]=function(dados){
-    try{delete window[name];}catch(e){}
-    var cpfLimpo=cpf.replace(/\D/g,'');
-    var found=null;
-    (dados.cadastros||[]).forEach(function(r){if(r.cpf&&r.cpf.replace(/\D/g,'')==cpfLimpo)found=r;});
-    (dados.sem_email||[]).forEach(function(r){if(r.cpf&&r.cpf.replace(/\D/g,'')==cpfLimpo&&!found)found=r;});
-    var el=document.getElementById('res_verif');
+  var cbName = '_ver' + Date.now();
+  window[cbName] = function(dados){
+    try{ delete window[cbName]; }catch(e){}
+    var cpfLimpo = cpf.replace(/\D/g,'');
+    var found = null;
+    (dados.cadastros||[]).forEach(function(r){
+      if(r.cpf && r.cpf.replace(/\D/g,'')==cpfLimpo) found=r;
+    });
+    (dados.sem_email||[]).forEach(function(r){
+      if(r.cpf && r.cpf.replace(/\D/g,'')==cpfLimpo && !found) found=r;
+    });
+    var el = document.getElementById('res_verif');
     if(!found){
       el.innerHTML='<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:16px;font-size:13px;color:#DC2626;text-align:center;"><strong>CPF nao encontrado.</strong><br/>Voce ainda nao realizou seu cadastro ou o CPF esta incorreto.</div>';
     } else if(found.status==='concluido'){
@@ -431,19 +460,24 @@ function verificar(){
       el.innerHTML='<div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;padding:18px;text-align:center;"><span style="font-size:40px;display:block;margin-bottom:10px;">&#128337;</span><strong style="font-size:17px;color:#92400E;display:block;margin-bottom:8px;">Cadastro em andamento</strong><p style="font-size:14px;color:#92400E;line-height:1.7;">Seus dados foram recebidos.<br/>Aguarde em ate 24 horas.</p></div>';
     }
   };
-  var s=document.createElement('script');
-  s.src=SURL+'?callback='+name+'&t='+Date.now();
-  s.onerror=function(){document.getElementById('res_verif').innerHTML='<div style="color:#EF4444;font-size:13px;">Erro de conexao. Tente novamente.</div>';};
+  var s = document.createElement('script');
+  s.src = SURL + '?callback=' + cbName + '&t=' + Date.now();
+  s.onerror = function(){
+    document.getElementById('res_verif').innerHTML='<div style="color:#EF4444;font-size:13px;">Erro de conexao. Tente novamente.</div>';
+  };
   document.head.appendChild(s);
 }
 
 function autoEmail(input){
-  var v=input.value,sug=document.getElementById('email-sug');
-  if(v.indexOf('@')>=0&&v.indexOf('@seduc')<0){
-    var sugestao=v.split('@')[0]+'@seduc.araruama.rj.gov.br';
+  var v=input.value, sug=document.getElementById('email-sug');
+  if(v.indexOf('@')>=0 && v.indexOf('@seduc')<0){
+    var sugestao = v.split('@')[0]+'@seduc.araruama.rj.gov.br';
     sug.innerHTML='&#128073; Usar: <strong>'+sugestao+'</strong>';
-    sug.style.display='block';sug._val=sugestao;
-  }else{sug.style.display='none';}
+    sug.style.display='block';
+    sug._val=sugestao;
+  } else {
+    sug.style.display='none';
+  }
 }
 function aceitarSug(){
   var sug=document.getElementById('email-sug');
@@ -455,11 +489,38 @@ function emailKey(e){
   if((e.key==='Tab'||e.key==='Enter')&&sug.style.display!=='none'){e.preventDefault();aceitarSug();}
   if(e.key==='Escape')sug.style.display='none';
 }
-function mCPF(i){var v=i.value.replace(/\D/g,'').slice(0,11);if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');i.value=v;}
-function mCPF2(i){var v=i.value.replace(/\D/g,'').slice(0,11);if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');i.value=v;}
-function mCEP(i){var v=i.value.replace(/\D/g,'').slice(0,8);if(v.length>5)v=v.replace(/(\d{5})(\d{1,3})/,'$1-$2');i.value=v;}
-function valCPF(cpf){cpf=cpf.replace(/\D/g,'');if(cpf.length!==11||/^(\d)\1+$/.test(cpf))return false;var s=0,r;for(var i=0;i<9;i++)s+=+cpf[i]*(10-i);r=(s*10)%11;if(r>=10)r=0;if(r!==+cpf[9])return false;s=0;for(var i=0;i<10;i++)s+=+cpf[i]*(11-i);r=(s*10)%11;if(r>=10)r=0;return r===+cpf[10];}
+function mCPF(i){
+  var v=i.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+  else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+  else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+  i.value=v;
+}
+function mCPF2(i){
+  var v=i.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+  else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+  else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+  i.value=v;
+}
+function mCEP(i){
+  var v=i.value.replace(/\D/g,'').slice(0,8);
+  if(v.length>5)v=v.replace(/(\d{5})(\d{1,3})/,'$1-$2');
+  i.value=v;
+}
+function valCPF(cpf){
+  cpf=cpf.replace(/\D/g,'');
+  if(cpf.length!==11||/^(\d)\1+$/.test(cpf))return false;
+  var s=0,r;
+  for(var i=0;i<9;i++)s+=+cpf[i]*(10-i);
+  r=(s*10)%11;if(r>=10)r=0;if(r!==+cpf[9])return false;
+  s=0;
+  for(var i=0;i<10;i++)s+=+cpf[i]*(11-i);
+  r=(s*10)%11;if(r>=10)r=0;
+  return r===+cpf[10];
+}
 </script>
+
 
 </body>
 </html>
