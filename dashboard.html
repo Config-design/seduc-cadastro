@@ -123,6 +123,7 @@ td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
 
 <script>
 var SURL='https://script.google.com/macros/s/AKfycbwFJC2kXIh9QGi3TfokE_ZjDV02uuBHLcSxRnQ8Ekr5fJml2b5pMS2GwyeD0UwsnsFuQw/exec';
+var SHEETDB='https://sheetdb.io/api/v1/2v2qfmfu1nnoh';
 
 /* ── Copiar link ── */
 function doCopy(){
@@ -221,27 +222,45 @@ function render(cads, sems){
   }
 }
 
-/* ── Liberar acesso ── */
+/* ── Liberar acesso via SheetDB ── */
 function liberar(btn, id, nome){
   if(!confirm('Marcar acesso de "'+nome+'" como liberado?'))return;
   btn.textContent='Salvando...';btn.disabled=true;
-  var dados={action:'status',id:id,status:'concluido'};
-  var url=SURL+'?t='+Date.now()+'&d='+encodeURIComponent(JSON.stringify(dados));
-  jsonpOnce(url, function(res, err){
-    if(err){btn.textContent='Erro!';btn.disabled=false;alert('Erro ao salvar. Tente novamente.');return;}
-    setTimeout(reload, 1000);
+  fetch(SHEETDB+'/id/'+encodeURIComponent(id), {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify({data:{status:'concluido'}})
+  })
+  .then(function(r){return r.json();})
+  .then(function(){setTimeout(reload,800);})
+  .catch(function(){
+    btn.textContent='Erro!';btn.disabled=false;
+    alert('Erro ao liberar. Tente novamente.');
   });
 }
 
-/* ── Limpar ── */
+/* ── Limpar via SheetDB ── */
 function doLimpar(tipo){
-  if(!confirm('Apagar todos os registros de "'+tipo+'"? Nao sera possivel recuperar.'))return;
-  var dados={action:'delete',tipo:tipo};
-  var url=SURL+'?t='+Date.now()+'&d='+encodeURIComponent(JSON.stringify(dados));
-  jsonpOnce(url, function(res, err){
-    if(err){alert('Erro ao limpar. Tente novamente.');return;}
-    setTimeout(reload, 1000);
-  });
+  if(!confirm('Apagar todos os registros? Nao sera possivel recuperar.'))return;
+  var sheet = tipo === 'sem_email' ? '?sheet=sem_email' : '';
+  // Busca todos e deleta linha por linha pelo campo correto
+  fetch(SHEETDB+sheet, {headers:{'Accept':'application/json'}})
+  .then(function(r){return r.json();})
+  .then(function(lista){
+    if(!lista||!lista.length){reload();return;}
+    var promessas = lista.map(function(row){
+      // cadastros tem "id", sem_email usa "nome" como chave
+      var chave = tipo==='sem_email' ? 'nome' : 'id';
+      var valor = row[chave];
+      return fetch(SHEETDB+sheet+'/'+chave+'/'+encodeURIComponent(valor),{
+        method:'DELETE',
+        headers:{'Accept':'application/json'}
+      });
+    });
+    return Promise.all(promessas);
+  })
+  .then(function(){setTimeout(reload,800);})
+  .catch(function(){alert('Erro ao limpar. Tente novamente.');});
 }
 
 /* ── Exportar Excel ── */
