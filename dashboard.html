@@ -145,14 +145,18 @@ function reload(){
   btn.textContent='Carregando...';btn.classList.add('load');
 
   Promise.all([
-    fetch(SHEETDB, {headers:{'Accept':'application/json'}}).then(function(r){return r.json();}),
-    fetch(SHEETDB+'?sheet=sem_email', {headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).catch(function(){return [];})
+    fetch(SHEETDB, {headers:{'Accept':'application/json'}})
+      .then(function(r){return r.json();})
+      .then(function(d){return Array.isArray(d) ? d : [];})
+      .catch(function(){return [];}),
+    fetch(SHEETDB+'?sheet=sem_email', {headers:{'Accept':'application/json'}})
+      .then(function(r){return r.json();})
+      .then(function(d){return Array.isArray(d) ? d : [];})
+      .catch(function(){return [];})
   ])
   .then(function(results){
     btn.textContent='Atualizar';btn.classList.remove('load');
-    var cads = Array.isArray(results[0]) ? results[0] : [];
-    var sems = Array.isArray(results[1]) ? results[1] : [];
-    render(cads, sems);
+    render(results[0], results[1]);
   })
   .catch(function(){
     btn.textContent='Atualizar';btn.classList.remove('load');
