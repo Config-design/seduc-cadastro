@@ -271,6 +271,7 @@ select.sel.err{border-color:#EF4444;}
 </div>
 <script>
 var SURL='https://script.google.com/macros/s/AKfycbwFJC2kXIh9QGi3TfokE_ZjDV02uuBHLcSxRnQ8Ekr5fJml2b5pMS2GwyeD0UwsnsFuQw/exec';
+var SHEETDB='https://sheetdb.io/api/v1/2v2qfmfu1nnoh';
 var fluxo=null,di={};
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
@@ -375,55 +376,29 @@ function finalizar(){
   });
 }
 
-// Envia dados via GET usando tag <script> — mesmo mecanismo do JSONP
-// O Apps Script recebe via e.parameter.dados, salva e retorna callback(resultado)
+// Envia dados via SheetDB (resolve CORS automaticamente)
 function enviarGET(dados, cb, tentativa){
   tentativa = tentativa || 1;
-  var cbName = '_sv' + Date.now() + '_' + tentativa;
-  var done = false;
-
-  var timer = setTimeout(function(){
-    if(!done){
-      done = true;
-      limpar(cbName);
-      if(tentativa < 3){
-        setTimeout(function(){ enviarGET(dados, cb, tentativa+1); }, 3000);
-      } else {
-        cb(false);
-      }
-    }
-  }, 30000);
-
-  window[cbName] = function(res){
-    if(!done){
-      done = true;
-      clearTimeout(timer);
-      limpar(cbName);
+  fetch(SHEETDB, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+    body: JSON.stringify({data: dados})
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(json){
+    if(json && json.created){
       cb(true);
+    } else {
+      throw new Error('Resposta inesperada');
     }
-  };
-
-  var s = document.createElement('script');
-  s.id = cbName;
-  s.src = SURL
-    + '?callback=' + cbName
-    + '&dados=' + encodeURIComponent(JSON.stringify(dados))
-    + '&t=' + Date.now();
-
-  s.onerror = function(){
-    if(!done){
-      done = true;
-      clearTimeout(timer);
-      limpar(cbName);
-      if(tentativa < 3){
-        setTimeout(function(){ enviarGET(dados, cb, tentativa+1); }, 3000);
-      } else {
-        cb(false);
-      }
+  })
+  .catch(function(){
+    if(tentativa < 3){
+      setTimeout(function(){ enviarGET(dados, cb, tentativa+1); }, 2000);
+    } else {
+      cb(false);
     }
-  };
-
-  document.head.appendChild(s);
+  });
 }
 
 function limpar(id){
