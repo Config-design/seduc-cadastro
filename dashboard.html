@@ -146,19 +146,19 @@ function reload(){
       render(cads, sems);
     }
   }
-  fetch(SHEETDB+'?sheet=cadastros',{headers:{'Accept':'application/json'}})
+  fetch(SHEETDB,{headers:{'Accept':'application/json'}})
     .then(function(r){return r.json();})
     .then(function(d){if(Array.isArray(d))cads=d;})
     .catch(function(){})
     .then(done);
-  fetch(SHEETDB+'?sheet=sem_email',{headers:{'Accept':'application/json'}})
-    .then(function(r){return r.json();})
-    .then(function(d){if(Array.isArray(d))sems=d;})
-    .catch(function(){})
-    .then(done);
+  // sem_email: segunda aba (não disponível no plano free do SheetDB)
+  // Renderiza vazio e incrementa contador
+  Promise.resolve().then(done);
 }
 
 function render(cads, sems){
+  // Guard: verificar se o DOM está pronto
+  if(!document.getElementById('kT')) return;
   var sim=0,volt=0,pend=0,conc=0;
   cads.forEach(function(c){
     if(c.tipo==='ja_tinha_email')sim++;
@@ -217,7 +217,7 @@ function render(cads, sems){
 function liberar(btn, id, nome){
   if(!confirm('Marcar acesso de "'+nome+'" como liberado?'))return;
   btn.textContent='Salvando...';btn.disabled=true;
-  fetch(SHEETDB+'/id/'+encodeURIComponent(id)+'?sheet=cadastros',{
+  fetch(SHEETDB+'/id/'+encodeURIComponent(id),{
     method:'PATCH',
     headers:{'Content-Type':'application/json','Accept':'application/json'},
     body:JSON.stringify({data:{status:'concluido'}})
@@ -229,7 +229,7 @@ function liberar(btn, id, nome){
 
 function doLimpar(tipo){
   if(!confirm('Apagar todos os registros? Nao sera possivel recuperar.'))return;
-  var ep = SHEETDB+'?sheet='+(tipo==='sem_email'?'sem_email':'cadastros');
+  var ep = SHEETDB; // plano free: só uma aba
   var chave = tipo==='sem_email'?'nome':'id';
   fetch(ep,{headers:{'Accept':'application/json'}})
   .then(function(r){return r.json();})
@@ -244,7 +244,7 @@ function doLimpar(tipo){
 }
 
 function doExp(tipo){
-  var ep = SHEETDB+'?sheet='+(tipo==='sem_email'?'sem_email':'cadastros');
+  var ep = SHEETDB; // plano free: só uma aba
   fetch(ep,{headers:{'Accept':'application/json'}})
   .then(function(r){return r.json();})
   .then(function(lista){
@@ -265,8 +265,12 @@ function doExp(tipo){
   .catch(function(){alert('Erro ao exportar.');});
 }
 
-reload();
-setInterval(reload,15000);
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',function(){reload();setInterval(reload,15000);});
+} else {
+  reload();
+  setInterval(reload,15000);
+}
 </script>
 </body>
 </html>
