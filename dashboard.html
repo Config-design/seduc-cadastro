@@ -145,7 +145,7 @@ function reload(){
   btn.textContent='Carregando...';btn.classList.add('load');
 
   Promise.all([
-    fetch(SHEETDB, {headers:{'Accept':'application/json'}})
+    fetch(SHEETDB+'?sheet=cadastros', {headers:{'Accept':'application/json'}})
       .then(function(r){return r.json();})
       .then(function(d){return Array.isArray(d) ? d : [];})
       .catch(function(){return [];}),
@@ -213,7 +213,7 @@ function render(cads, sems){
 function liberar(btn, id, nome){
   if(!confirm('Marcar acesso de "'+nome+'" como liberado?'))return;
   btn.textContent='Salvando...';btn.disabled=true;
-  fetch(SHEETDB+'/id/'+encodeURIComponent(id), {
+  fetch(SHEETDB+'/id/'+encodeURIComponent(id)+'?sheet=cadastros', {
     method:'PATCH',
     headers:{'Content-Type':'application/json','Accept':'application/json'},
     body:JSON.stringify({data:{status:'concluido'}})
@@ -229,7 +229,7 @@ function liberar(btn, id, nome){
 /* ── Limpar registros ── */
 function doLimpar(tipo){
   if(!confirm('Apagar todos os registros? Nao sera possivel recuperar.'))return;
-  var endpoint = tipo==='sem_email' ? SHEETDB+'?sheet=sem_email' : SHEETDB;
+  var endpoint = tipo==='sem_email' ? SHEETDB+'?sheet=sem_email' : SHEETDB+'?sheet=cadastros';
   var chave    = tipo==='sem_email' ? 'nome' : 'id';
 
   fetch(endpoint, {headers:{'Accept':'application/json'}})
@@ -251,7 +251,7 @@ function doLimpar(tipo){
 
 /* ── Exportar CSV ── */
 function doExp(tipo){
-  var endpoint = tipo==='sem_email' ? SHEETDB+'?sheet=sem_email' : SHEETDB;
+  var endpoint = tipo==='sem_email' ? SHEETDB+'?sheet=sem_email' : SHEETDB+'?sheet=cadastros';
   fetch(endpoint, {headers:{'Accept':'application/json'}})
   .then(function(r){return r.json();})
   .then(function(lista){
