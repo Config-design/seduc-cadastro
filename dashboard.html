@@ -146,9 +146,15 @@ function reload(){
 
   Promise.all([
     fetch(SHEETDB+'?sheet=cadastros', {headers:{'Accept':'application/json'}})
-      .then(function(r){return r.json();})
-      .then(function(d){return Array.isArray(d) ? d : [];})
-      .catch(function(){return [];}),
+      .then(function(r){
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        return r.json();
+      })
+      .then(function(d){
+        console.log('SheetDB cadastros:', d);
+        return Array.isArray(d) ? d : [];
+      })
+      .catch(function(e){console.error('Erro cadastros:',e);return [];}),
     fetch(SHEETDB+'?sheet=sem_email', {headers:{'Accept':'application/json'}})
       .then(function(r){return r.json();})
       .then(function(d){return Array.isArray(d) ? d : [];})
@@ -156,11 +162,12 @@ function reload(){
   ])
   .then(function(results){
     btn.textContent='Atualizar';btn.classList.remove('load');
-    render(results[0], results[1]);
+    render(results[0]||[], results[1]||[]);
   })
-  .catch(function(){
+  .catch(function(err){
     btn.textContent='Atualizar';btn.classList.remove('load');
-    document.getElementById('bCad').innerHTML='<tr><td colspan="8" style="text-align:center;color:#EF4444;padding:20px;">Erro ao carregar. Tente novamente.</td></tr>';
+    // Tenta renderizar vazio em vez de mostrar erro
+    render([], []);
   });
 }
 
