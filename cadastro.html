@@ -210,9 +210,12 @@ select.sel.err{border-color:#EF4444;}
     <div class="step" id="s3a">
       <div class="sh"><div class="slabel">Acao necessaria</div><button class="bback" onclick="goS2()">&#8592; Voltar</button></div>
       <h2>Crie seu e-mail institucional</h2>
-      <div class="al al-w"><strong>Seus dados ja foram salvos.</strong><br/>Apos criar o e-mail, volte a este link e clique em "Ja tenho meu e-mail" para finalizar.</div>
+      <div class="al al-w">Voce precisara de um e-mail institucional para acessar o sistema.<br/>Crie o seu e-mail e depois volte aqui para finalizar o cadastro.</div>
       <p style="font-size:13px;color:#475569;font-weight:500;margin-bottom:6px;">Acesse o portal para criar seu e-mail:</p>
       <a href="https://ditei.educacaoararuama.rj.gov.br/cadastro" target="_blank" class="btn btn-w" style="display:flex;align-items:center;justify-content:center;">Criar e-mail institucional</a>
+      <div class="sep"></div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:2px;">Nao tem acesso agora? Registre sua solicitacao:</p>
+      <button class="btn btn-p" id="btnSemEmail" onclick="confirmarSemEmail()">Registrar solicitacao de e-mail</button>
       <div class="sep"></div>
       <p style="font-size:13px;color:var(--muted);margin-bottom:2px;">Ja criou? Volte e finalize aqui:</p>
       <button class="btn btn-o" onclick="voltou()">Ja tenho meu e-mail - Finalizar</button>
@@ -234,6 +237,20 @@ select.sel.err{border-color:#EF4444;}
         <input type="text" id="cep" placeholder="00000-000" maxlength="9" inputmode="numeric" oninput="mCEP(this)"/>
         <div class="ferr" id="e-cep">CEP invalido.</div></div>
       <button class="btn btn-p" id="btnFin" onclick="finalizar()">Enviar cadastro</button>
+    </div>
+
+    <!-- S4sem: Confirmacao sem email -->
+    <div class="step" id="s4sem">
+      <div style="text-align:center;padding:24px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">📋</div>
+        <h2 style="color:#1E3A5F;margin-bottom:12px;">Solicitacao registrada!</h2>
+        <div class="al al-w" style="text-align:left;">
+          Sua solicitacao de criacao de e-mail foi registrada.<br/>
+          A equipe da Devlith entrara em contato em ate 24 horas.
+        </div>
+        <div class="sep"></div>
+        <p style="font-size:13px;color:var(--muted);">Apos criar seu e-mail, volte a este link e clique em <strong>"Verificar status"</strong> para acompanhar.</p>
+      </div>
     </div>
 
     <!-- S4: Aguardando -->
@@ -331,14 +348,23 @@ function goVerif(){showStep('sverif','on','','','','');}
 function escolha(op){
   fluxo=op;
   if(op==='nao'){
-    showStep('sload','d','d','on','d','d');
-    var reg={tipo:'sem_email',nome:di.nome,escola:di.escola,cargo:di.cargo,
-             status:'Aguardando criacao de e-mail',statusTipo:'pendente',
-             dataHora:new Date().toISOString()};
-    enviarGET(reg,function(ok){showStep('s3a','d','d','on','d','d');});
+    // Só mostra a tela — salva só quando clicar "Confirmar sem e-mail"
+    showStep('s3a','d','d','on','d','d');
   } else {
     showStep('s3b','d','d','on','d','d');
   }
+}
+
+function confirmarSemEmail(){
+  var btn = document.getElementById('btnSemEmail');
+  if(btn) btn.disabled=true;
+  showStep('sload','d','d','on','d','d');
+  var reg={tipo:'sem_email',nome:di.nome,escola:di.escola,cargo:di.cargo,
+           status:'Aguardando criacao de e-mail',statusTipo:'pendente',
+           dataHora:new Date().toISOString()};
+  enviarGET(reg,function(ok){
+    showStep('s4sem','d','d','d','d','d');
+  });
 }
 
 function voltou(){fluxo='voltou';showStep('s3b','d','d','on','d','d');}
