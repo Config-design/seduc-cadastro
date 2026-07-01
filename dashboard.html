@@ -256,26 +256,36 @@ function render(cads,sems){
 }
 
 function liberar(btn,id,nome){
-  if(!confirm('Liberar acesso de '+nome+'?'))return;
-  btn.textContent='Salvando...';
-  btn.disabled=true;
-  btn.style.background='#D97706';
-  fetch(SHEETDB+'/id/'+encodeURIComponent(id),{
-    method:'PATCH',
-    headers:{'Content-Type':'application/json','Accept':'application/json'},
-    body:JSON.stringify({data:{status:'concluido'}})
-  })
-  .then(function(r){return r.text();})
-  .then(function(){
-    btn.textContent='Liberado!';
-    btn.style.background='#16A34A';
-    setTimeout(reload,1000);
-  })
-  .catch(function(){
-    btn.textContent='Erro - tentar novamente';
-    btn.disabled=false;
-    btn.style.background='';
-  });
+  var overlay=document.getElementById('modal-overlay');
+  var msg=document.getElementById('modal-msg');
+  var confirmar=document.getElementById('modal-confirmar');
+  var cancelar=document.getElementById('modal-cancelar');
+  msg.textContent='Liberar acesso de '+nome+'? A pessoa sera notificada que seu cadastro esta pronto.';
+  overlay.style.display='flex';
+  function fechar(){overlay.style.display='none';confirmar.onclick=null;cancelar.onclick=null;}
+  cancelar.onclick=fechar;
+  confirmar.onclick=function(){
+    fechar();
+    btn.textContent='Salvando...';
+    btn.disabled=true;
+    btn.style.background='#D97706';
+    fetch(SHEETDB+'/id/'+encodeURIComponent(id),{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({data:{status:'concluido'}})
+    })
+    .then(function(r){return r.text();})
+    .then(function(){
+      btn.textContent='Liberado!';
+      btn.style.background='#16A34A';
+      setTimeout(reload,1000);
+    })
+    .catch(function(){
+      btn.textContent='Tentar novamente';
+      btn.disabled=false;
+      btn.style.background='';
+    });
+  };
 }
 
 function doLimpar(tipo){
@@ -339,5 +349,17 @@ if(document.readyState==='loading'){
   setInterval(reload,15000);
 }
 </script>
+
+<!-- Modal de confirmação -->
+<div id="modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:28px 24px;max-width:340px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <h3 id="modal-titulo" style="margin:0 0 12px;font-size:18px;color:#1E3A5F;">Confirmar</h3>
+    <p id="modal-msg" style="margin:0 0 24px;font-size:14px;color:#475569;line-height:1.6;"></p>
+    <div style="display:flex;gap:10px;">
+      <button id="modal-cancelar" style="flex:1;padding:10px;border:1px solid #CBD5E1;border-radius:8px;background:#fff;color:#475569;font-size:14px;cursor:pointer;">Cancelar</button>
+      <button id="modal-confirmar" style="flex:1;padding:10px;border:none;border-radius:8px;background:#1E3A5F;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Confirmar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
