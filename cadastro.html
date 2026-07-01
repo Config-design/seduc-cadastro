@@ -410,13 +410,10 @@ function enviarGET(dados, cb, tentativa){
     headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
     body: JSON.stringify({data: dados})
   })
-  .then(function(res){ return res.json(); })
-  .then(function(json){
-    if(json && json.created){
-      cb(true);
-    } else {
-      throw new Error('Resposta inesperada');
-    }
+  .then(function(res){
+    // Aceita qualquer resposta HTTP 200-299 como sucesso
+    if(res.ok){ cb(true); return; }
+    throw new Error('HTTP '+res.status);
   })
   .catch(function(){
     if(tentativa < 3){
