@@ -288,7 +288,7 @@ select.sel.err{border-color:#EF4444;}
 </div>
 <script>
 var SURL='https://script.google.com/macros/s/AKfycbwFJC2kXIh9QGi3TfokE_ZjDV02uuBHLcSxRnQ8Ekr5fJml2b5pMS2GwyeD0UwsnsFuQw/exec';
-var SHEETDB='https://sheetdb.io/api/v1/2v2qfmfu1nnoh';
+var SHEETDB='https://sheetdb.io/api/v1/qzlf5xwl16rr8';
 var fluxo=null,di={};
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
@@ -440,7 +440,7 @@ function verificar(){
   var el = document.getElementById('res_verif');
   el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;">Consultando...</div>';
   var cpfLimpo = cpf.replace(/\D/g,'');
-  fetch('https://sheetdb.io/api/v1/2v2qfmfu1nnoh/search?cpf='+encodeURIComponent(cpf),{
+  fetch('https://sheetdb.io/api/v1/qzlf5xwl16rr8/search?cpf='+encodeURIComponent(cpf),{
     headers:{'Accept':'application/json'}
   })
   .then(function(r){return r.json();})
