@@ -230,6 +230,9 @@ select.sel.err{border-color:#EF4444;}
         <input type="text" id="email" placeholder="nome@seduc.araruama.rj.gov.br" inputmode="email" autocorrect="off" autocapitalize="none" spellcheck="false" oninput="autoEmail(this)" onkeydown="emailKey(event)"/>
         <div id="email-sug" onclick="aceitarSug()" style="display:none;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px;padding:10px 14px;font-size:14px;color:var(--brand);cursor:pointer;margin-top:4px;font-weight:500;"></div>
         <div class="ferr" id="e-email">Informe um e-mail valido.</div></div>
+      <div class="field"><label>E-mail pessoal <span class="req">*</span></label>
+        <input type="text" id="emailPessoal" placeholder="seuemail@gmail.com" inputmode="email" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+        <div class="ferr" id="e-emailPessoal">Informe um e-mail valido.</div></div>
       <div class="field"><label>CPF <span class="req">*</span></label>
         <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" oninput="mCPF(this)"/>
         <div class="ferr" id="e-cpf">CPF invalido.</div></div>
@@ -288,8 +291,19 @@ select.sel.err{border-color:#EF4444;}
 </div>
 <script>
 var SURL='https://script.google.com/macros/s/AKfycbwFJC2kXIh9QGi3TfokE_ZjDV02uuBHLcSxRnQ8Ekr5fJml2b5pMS2GwyeD0UwsnsFuQw/exec';
-var SUPA_URL='https://ioswwipjfyuzwcqydtsp.supabase.co';
-var SUPA_KEY='sb_publishable_1UpjBHimrYL-IrOb9HaBzg_gGoBsVd9';
+// Envio via Google Forms (sem CORS, sem limite de requisicoes)
+var FORM_ACTION='https://docs.google.com/forms/u/0/d/e/1FAIpQLSc2mIZCyDXk2CuJK6wLo6MTLneOGNs1lUMudM2vS4DIpif5wg/formResponse';
+var CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR2kgp6KtuQ83H62gD863Xmc50cHAn3o1IVBeKPlVPhXJgjYNM0J3UgvV5DupkDy-519crXfAnLUpZB/pub?gid=909378355&single=true&output=csv';
+var LINK_SISTEMA='https://devlitheduca.com/';
+var ENTRY={
+  nome:'entry.1259662856',
+  cargo:'entry.789488069',
+  email:'entry.299311754',
+  emailPessoal:'entry.1522206389',
+  cpf:'entry.360982203',
+  cep:'entry.1024104584',
+  escola:'entry.2114375194'
+};
 var fluxo=null,di={};
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
@@ -373,6 +387,7 @@ function voltou(){fluxo='voltou';showStep('s3b','d','d','on','d','d');}
 function finalizar(){
   if(!chk([
     {id:'email',eid:'e-email',fn:function(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}},
+    {id:'emailPessoal',eid:'e-emailPessoal',fn:function(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}},
     {id:'cpf',eid:'e-cpf',fn:function(v){return valCPF(v);}},
     {id:'cep',eid:'e-cep',fn:function(v){return /^\d{5}-\d{3}$/.test(v);}}
   ]))return;
@@ -384,6 +399,7 @@ function finalizar(){
     nome:di.nome,escola:di.escola,cargo:di.cargo,
     cpf:document.getElementById('cpf').value.trim(),
     email:document.getElementById('email').value.trim(),
+    emailPessoal:document.getElementById('emailPessoal').value.trim(),
     cep:document.getElementById('cep').value.trim(),
     status:'aguardando',
     dataHora:new Date().toISOString()
@@ -393,7 +409,7 @@ function finalizar(){
       document.getElementById('resumo').innerHTML=
         '<strong>Resumo:</strong><br/>Nome: '+reg.nome+
         '<br/>Escola: '+reg.escola+'<br/>Cargo: '+reg.cargo+
-        '<br/>E-mail: '+reg.email+'<br/>CPF: '+reg.cpf+'<br/>CEP: '+reg.cep;
+        '<br/>E-mail institucional: '+reg.email+'<br/>E-mail pessoal: '+reg.emailPessoal+'<br/>CPF: '+reg.cpf+'<br/>CEP: '+reg.cep;
       showStep('s4','d','d','d','d','d');
     } else {
       document.getElementById('btnFin').disabled=false;
@@ -403,32 +419,35 @@ function finalizar(){
   });
 }
 
-// Envia dados via Supabase REST API
+// Envia dados via Google Forms (fetch no-cors, sem depender de CORS/API keys)
 function enviarGET(dados, cb, tentativa){
   tentativa = tentativa || 1;
-  var tabela = dados.tipo === 'sem_email' ? 'sem_email' : 'cadastros';
-  fetch(SUPA_URL+'/rest/v1/'+tabela, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'apikey': SUPA_KEY,
-      'Authorization': 'Bearer '+SUPA_KEY,
-      'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify(dados)
-  })
-  .then(function(res){
-    if(res.ok){ cb(true); return; }
-    throw new Error('HTTP '+res.status);
-  })
-  .catch(function(){
-    if(tentativa < 3){
-      setTimeout(function(){ enviarGET(dados, cb, tentativa+1); }, 2000);
-    } else {
-      cb(false);
-    }
-  });
+  try{
+    var fd = new FormData();
+    fd.append(ENTRY.nome, dados.nome || '');
+    fd.append(ENTRY.escola, dados.escola || '');
+    fd.append(ENTRY.cargo, dados.cargo || '');
+    fd.append(ENTRY.email, dados.email || '');
+    fd.append(ENTRY.emailPessoal, dados.emailPessoal || '');
+    fd.append(ENTRY.cpf, dados.cpf || '');
+    fd.append(ENTRY.cep, dados.cep || '');
+
+    fetch(FORM_ACTION, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: fd
+    })
+    .then(function(){ cb(true); })
+    .catch(function(){
+      if(tentativa < 3){
+        setTimeout(function(){ enviarGET(dados, cb, tentativa+1); }, 2000);
+      } else {
+        cb(false);
+      }
+    });
+  }catch(e){
+    cb(false);
+  }
 }
 
 function limpar(id){
@@ -437,7 +456,38 @@ function limpar(id){
   if(el) el.parentNode.removeChild(el);
 }
 
-// Verifica status por CPF (usa GET/JSONP igual ao envio)
+function parseCSVcad(text){
+  var rows=[],row=[],field='',inQuotes=false;
+  for(var i=0;i<text.length;i++){
+    var c=text[i],n=text[i+1];
+    if(inQuotes){
+      if(c==='"'&&n==='"'){field+='"';i++;}
+      else if(c==='"'){inQuotes=false;}
+      else{field+=c;}
+    } else {
+      if(c==='"'){inQuotes=true;}
+      else if(c===','){row.push(field);field='';}
+      else if(c==='\r'){}
+      else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';}
+      else{field+=c;}
+    }
+  }
+  if(field.length||row.length){row.push(field);rows.push(row);}
+  return rows.filter(function(r){return r.length>1||r[0]!=='';});
+}
+
+function normHeader(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+
+function findCol(headers, alvo){
+  for(var i=0;i<headers.length;i++){
+    if(normHeader(headers[i]).indexOf(alvo)>=0) return i;
+  }
+  return -1;
+}
+
+// Verifica status por CPF consultando a planilha publicada como CSV
 function verificar(){
   var cpf = document.getElementById('cpf_v').value.trim();
   if(!valCPF(cpf)){
@@ -445,34 +495,57 @@ function verificar(){
     return;
   }
   var el = document.getElementById('res_verif');
-  el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;">Consultando...</div>';
+  el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;"><span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span>Consultando...</div>';
   var cpfLimpo = cpf.replace(/\D/g,'');
-  fetch(SUPA_URL+'/rest/v1/cadastros?cpf=eq.'+encodeURIComponent(cpf),{
-    headers:{
-      'apikey':SUPA_KEY,
-      'Authorization':'Bearer '+SUPA_KEY,
-      'Accept':'application/json'
-    }
-  })
-  .then(function(r){return r.json();})
-  .then(function(lista){
-    var found = null;
-    if(Array.isArray(lista) && lista.length > 0){
-      lista.forEach(function(r){
-        if(r.cpf && r.cpf.replace(/\D/g,'')==cpfLimpo) found=r;
+
+  fetch(CSV_URL+'&_ts='+Date.now())
+    .then(function(r){return r.text();})
+    .then(function(text){
+      var rows = parseCSVcad(text);
+      var headers = rows.shift() || [];
+      var iNome = findCol(headers,'nome');
+      var iEmail = findCol(headers,'institucional');
+      var iCpf = findCol(headers,'cpf');
+      var iStatus = findCol(headers,'status');
+
+      var found = null;
+      rows.forEach(function(r){
+        var c = (r[iCpf]||'').replace(/\D/g,'');
+        if(c === cpfLimpo) found = r;
       });
-    }
-    if(!found){
-      el.innerHTML='<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:16px;font-size:13px;color:#DC2626;text-align:center;"><strong>CPF nao encontrado.</strong><br/>Voce ainda nao realizou seu cadastro ou o CPF esta incorreto.</div>';
-    } else if(found.status==='concluido'){
-      el.innerHTML='<div style="background:#F0FDF4;border:2px solid #16A34A;border-radius:12px;padding:18px;text-align:center;"><span style="font-size:40px;display:block;margin-bottom:10px;">&#10084;&#65039;</span><strong style="font-size:17px;color:#15803D;display:block;margin-bottom:8px;">Seu cadastro foi realizado com sucesso!</strong><p style="font-size:14px;color:#166534;line-height:1.7;">Voce ja pode acessar o sistema da Devlith com seu e-mail institucional.</p></div>';
-    } else {
-      el.innerHTML='<div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;padding:18px;text-align:center;"><span style="font-size:40px;display:block;margin-bottom:10px;">&#128337;</span><strong style="font-size:17px;color:#92400E;display:block;margin-bottom:8px;">Cadastro em andamento</strong><p style="font-size:14px;color:#92400E;line-height:1.7;">Seus dados foram recebidos.<br/>Aguarde em ate 24 horas.</p></div>';
-    }
-  })
-  .catch(function(){
-    el.innerHTML='<div style="color:#EF4444;font-size:13px;">Erro de conexao. Tente novamente.</div>';
-  });
+
+      if(!found){
+        el.innerHTML='<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:16px;font-size:13px;color:#DC2626;text-align:center;"><strong>CPF nao encontrado.</strong><br/>Voce ainda nao concluiu seu cadastro ou o CPF esta incorreto.</div>';
+        return;
+      }
+
+      var status = (found[iStatus]||'').trim().toLowerCase();
+      var nome = found[iNome]||'';
+      var primeiroNome = nome.split(' ')[0];
+      var emailInst = found[iEmail]||'';
+
+      if(status === 'liberado'){
+        el.innerHTML =
+          '<div style="background:#F0FDF4;border:2px solid #16A34A;border-radius:12px;padding:20px;text-align:center;">'+
+            '<span style="font-size:40px;display:block;margin-bottom:10px;">&#127881;</span>'+
+            '<strong style="font-size:17px;color:#15803D;display:block;margin-bottom:10px;">Ola, '+primeiroNome+'! Seu acesso ja esta liberado.</strong>'+
+            '<div style="background:white;border:1px solid #BBF7D0;border-radius:10px;padding:14px 16px;margin:14px 0;text-align:left;">'+
+              '<p style="font-size:11px;text-transform:uppercase;color:#64748B;margin-bottom:2px;">Usuario</p>'+
+              '<p style="font-size:14px;font-weight:700;color:#1E293B;margin-bottom:10px;">'+emailInst+'</p>'+
+              '<p style="font-size:11px;text-transform:uppercase;color:#64748B;margin-bottom:2px;">Senha</p>'+
+              '<p style="font-size:14px;font-weight:700;color:#1E293B;">'+cpf+'</p>'+
+            '</div>'+
+            '<a href="'+LINK_SISTEMA+'" target="_blank" style="display:inline-block;background:#16A34A;color:white;text-decoration:none;font-size:15px;font-weight:700;padding:13px 28px;border-radius:10px;">Acessar o sistema</a>'+
+          '</div>';
+      } else if(status === 'nao liberado' || status === 'não liberado'){
+        el.innerHTML='<div style="background:#FEF2F2;border:2px solid #FECACA;border-radius:12px;padding:18px;text-align:center;"><span style="font-size:40px;display:block;margin-bottom:10px;">&#9888;</span><strong style="font-size:17px;color:#DC2626;display:block;margin-bottom:8px;">Cadastro nao aprovado</strong><p style="font-size:14px;color:#991B1B;line-height:1.7;">Entre em contato com a Secretaria de Educacao para mais informacoes.</p></div>';
+      } else {
+        el.innerHTML='<div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;padding:18px;text-align:center;"><span style="font-size:40px;display:block;margin-bottom:10px;">&#128337;</span><strong style="font-size:17px;color:#92400E;display:block;margin-bottom:8px;">Cadastro em andamento</strong><p style="font-size:14px;color:#92400E;line-height:1.7;">Seus dados foram recebidos.<br/>Aguarde em ate 24 horas.</p></div>';
+      }
+    })
+    .catch(function(){
+      el.innerHTML='<div style="color:#EF4444;font-size:13px;">Erro de conexao. Tente novamente.</div>';
+    });
 }
 
 function autoEmail(input){
