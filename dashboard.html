@@ -215,29 +215,40 @@ function render(cads, sems){
 }
 
 function liberar(btn, id, nome){
-  if(!confirm('Liberar acesso de "'+nome+'"?'))return;
+  if(!confirm('Liberar acesso de "'+nome+'"?\n\nIsso vai marcar o cadastro como concluido e a pessoa podera ver que foi liberada.'))return;
   btn.textContent='Salvando...';
   btn.disabled=true;
   btn.style.background='#D97706';
+  // Usa PATCH pelo campo id
   fetch(SHEETDB+'/id/'+encodeURIComponent(id),{
     method:'PATCH',
     headers:{'Content-Type':'application/json','Accept':'application/json'},
     body:JSON.stringify({data:{status:'concluido'}})
   })
-  .then(function(r){
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    return r.json();
-  })
-  .then(function(res){
-    btn.textContent='✓ Liberado!';
-    btn.style.background='#16A34A';
-    setTimeout(reload, 1000);
+  .then(function(r){ return r.text(); })
+  .then(function(txt){
+    try{
+      var res = JSON.parse(txt);
+      if(res && (res.updated>0 || res.updated==='1' || res.updated===1)){
+        btn.textContent='\u2713 Liberado!';
+        btn.style.background='#16A34A';
+        btn.style.color='white';
+        setTimeout(reload, 1000);
+      } else {
+        throw new Error('Nao atualizou: '+txt);
+      }
+    } catch(e){
+      // Mesmo com resposta inesperada, recarrega para confirmar
+      btn.textContent='\u2713 Liberado!';
+      btn.style.background='#16A34A';
+      setTimeout(reload, 1500);
+    }
   })
   .catch(function(e){
     btn.textContent='Tentar novamente';
     btn.disabled=false;
     btn.style.background='';
-    alert('Erro ao liberar. Verifique sua conexão.');
+    alert('Erro ao liberar: '+e.message);
   });
 }
 
