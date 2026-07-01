@@ -122,28 +122,62 @@ td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
 </div>
 
 <script>
-var SHEETDB = 'https://sheetdb.io/api/v1/2v2qfmfu1nnoh';
-var LINK = 'https://config-design.github.io/seduc-cadastro/cadastro.html';
+var SHEETDB='https://sheetdb.io/api/v1/2v2qfmfu1nnoh';
+var LINK='https://config-design.github.io/seduc-cadastro/cadastro.html';
 
 function doCopy(){
   var btn=document.getElementById('btnCopy');
-  function ok(){btn.textContent='Copiado!';btn.classList.add('ok');showFb('Link copiado! Cole no WhatsApp.');setTimeout(function(){btn.textContent='📋 Copiar link';btn.classList.remove('ok');showFb('');},3000);}
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(LINK).then(ok).catch(function(){fb(LINK,ok);});}else{fb(LINK,ok);}
+  function ok(){
+    btn.textContent='Copiado!';
+    btn.classList.add('ok');
+    showFb('Link copiado! Cole no WhatsApp.');
+    setTimeout(function(){
+      btn.textContent='Copiar link';
+      btn.classList.remove('ok');
+      showFb('');
+    },3000);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(LINK).then(ok).catch(function(){fb(LINK,ok);});
+  } else {
+    fb(LINK,ok);
+  }
 }
-function fb(v,cb){var t=document.createElement('textarea');t.value=v;t.style.cssText='position:fixed;opacity:0;';document.body.appendChild(t);t.select();try{document.execCommand('copy');cb();}catch(e){}document.body.removeChild(t);}
+function fb(v,cb){
+  var t=document.createElement('textarea');
+  t.value=v;
+  t.style.cssText='position:fixed;opacity:0;';
+  document.body.appendChild(t);
+  t.select();
+  try{document.execCommand('copy');cb();}catch(e){}
+  document.body.removeChild(t);
+}
 function showFb(m){document.getElementById('cfb').textContent=m;}
-function fmt(v){if(!v||v===''||v==='undefined')return '-';try{var d=new Date(v);if(isNaN(d.getTime()))return String(v);return d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});}catch(e){return String(v);}}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function fmt(v){
+  if(!v||v===''||v==='undefined')return '-';
+  try{
+    var d=new Date(v);
+    if(isNaN(d.getTime()))return String(v);
+    return d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+  }catch(e){return String(v);}
+}
+function esc(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
 function reload(){
   var btn=document.getElementById('btnRef');
-  btn.textContent='Carregando...';btn.classList.add('load');
-  var cads=[], sems=[], feitos=0;
+  if(!btn)return;
+  btn.textContent='Carregando...';
+  btn.classList.add('load');
+  var cads=[],sems=[],feitos=0;
   function done(){
     feitos++;
     if(feitos===2){
-      btn.textContent='↻ Atualizar';btn.classList.remove('load');
-      render(cads, sems);
+      btn.textContent='Atualizar';
+      btn.classList.remove('load');
+      render(cads,sems);
     }
   }
   fetch(SHEETDB,{headers:{'Accept':'application/json'}})
@@ -151,14 +185,15 @@ function reload(){
     .then(function(d){if(Array.isArray(d))cads=d;})
     .catch(function(){})
     .then(done);
-  // sem_email: segunda aba (não disponível no plano free do SheetDB)
-  // Renderiza vazio e incrementa contador
-  Promise.resolve().then(done);
+  fetch(SHEETDB+'?sheet=sem_email',{headers:{'Accept':'application/json'}})
+    .then(function(r){return r.json();})
+    .then(function(d){if(Array.isArray(d))sems=d;})
+    .catch(function(){})
+    .then(done);
 }
 
-function render(cads, sems){
-  // Guard: verificar se o DOM está pronto
-  if(!document.getElementById('kT')) return;
+function render(cads,sems){
+  if(!document.getElementById('kT'))return;
   var sim=0,volt=0,pend=0,conc=0;
   cads.forEach(function(c){
     if(c.tipo==='ja_tinha_email')sim++;
@@ -166,7 +201,6 @@ function render(cads, sems){
     if(c.status==='concluido')conc++;
   });
   sems.forEach(function(r){if(r.statusTipo!=='convertido')pend++;});
-
   document.getElementById('kT').textContent=cads.length;
   document.getElementById('kS').textContent=sim;
   document.getElementById('kP').textContent=pend;
@@ -180,9 +214,12 @@ function render(cads, sems){
     bc.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px;">Nenhum cadastro ainda.</td></tr>';
   } else {
     bc.innerHTML=cads.map(function(c,i){
-      var lib=c.status==='concluido'
-        ? '<span style="color:#16A34A;font-weight:600;">&#10003; Liberado</span>'
-        : '<button class="blib" id="btn_'+i+'" onclick="liberar(this,'+JSON.stringify(c.id)+','+JSON.stringify(c.nome)+')">Liberar acesso</button>';
+      var statusTag=c.status==='concluido'
+        ? '<span class="tag tag-ok">Liberado</span>'
+        : '<span class="tag tag-wait">Aguardando</span>';
+      var acao=c.status==='concluido'
+        ? '<span style="color:#16A34A;font-weight:600;">Acesso liberado</span>'
+        : '<button class="blib" onclick="liberar(this,'+JSON.stringify(c.id)+','+JSON.stringify(c.nome)+')">Liberar acesso</button>';
       return '<tr>'
         +'<td>'+esc(c.nome)+'</td>'
         +'<td>'+esc(c.escola)+'</td>'
@@ -191,8 +228,8 @@ function render(cads, sems){
         +'<td>'+esc(c.cpf)+'</td>'
         +'<td>'+esc(c.cep)+'</td>'
         +'<td>'+esc(c.tipo==='ja_tinha_email'?'Ja tinha':'Criou e voltou')+'</td>'
-        +'<td>'+(c.status==='concluido'?'<span class="tag tag-ok">Liberado</span>':'<span class="tag tag-wait">Aguardando</span>')+'</td>'
-        +'<td>'+lib+'</td>'
+        +'<td>'+statusTag+'</td>'
+        +'<td>'+acao+'</td>'
         +'<td>'+fmt(c.dataHora)+'</td>'
         +'</tr>';
     }).join('');
@@ -200,7 +237,7 @@ function render(cads, sems){
 
   var bs=document.getElementById('bSem');
   if(!sems.length){
-    bs.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">&#9989; Nenhum usuario sem e-mail.</td></tr>';
+    bs.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Nenhum usuario sem e-mail.</td></tr>';
   } else {
     bs.innerHTML=sems.map(function(r){
       return '<tr>'
@@ -214,8 +251,8 @@ function render(cads, sems){
   }
 }
 
-function liberar(btn, id, nome){
-  if(!confirm('Liberar acesso de "'+nome+'"?'))return;
+function liberar(btn,id,nome){
+  if(!confirm('Liberar acesso de '+nome+'?'))return;
   btn.textContent='Salvando...';
   btn.disabled=true;
   btn.style.background='#D97706';
@@ -224,33 +261,32 @@ function liberar(btn, id, nome){
     headers:{'Content-Type':'application/json','Accept':'application/json'},
     body:JSON.stringify({data:{status:'concluido'}})
   })
-  .then(function(r){
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    return r.json();
-  })
-  .then(function(res){
-    btn.textContent='✓ Liberado!';
+  .then(function(r){return r.text();})
+  .then(function(){
+    btn.textContent='Liberado!';
     btn.style.background='#16A34A';
-    setTimeout(reload, 1000);
+    setTimeout(reload,1000);
   })
-  .catch(function(e){
-    btn.textContent='Tentar novamente';
+  .catch(function(){
+    btn.textContent='Erro - tentar novamente';
     btn.disabled=false;
     btn.style.background='';
-    alert('Erro ao liberar. Verifique sua conexão.');
   });
 }
 
 function doLimpar(tipo){
   if(!confirm('Apagar todos os registros? Nao sera possivel recuperar.'))return;
-  var ep = SHEETDB; // plano free: só uma aba
-  var chave = tipo==='sem_email'?'nome':'id';
+  var ep=tipo==='sem_email'?SHEETDB+'?sheet=sem_email':SHEETDB;
+  var chave=tipo==='sem_email'?'nome':'id';
   fetch(ep,{headers:{'Accept':'application/json'}})
   .then(function(r){return r.json();})
   .then(function(lista){
     if(!lista||!lista.length){reload();return;}
     return Promise.all(lista.map(function(row){
-      return fetch(ep+'/'+chave+'/'+encodeURIComponent(row[chave]),{method:'DELETE',headers:{'Accept':'application/json'}});
+      return fetch(ep+'/'+chave+'/'+encodeURIComponent(row[chave]),{
+        method:'DELETE',
+        headers:{'Accept':'application/json'}
+      });
     }));
   })
   .then(function(){setTimeout(reload,800);})
@@ -258,7 +294,7 @@ function doLimpar(tipo){
 }
 
 function doExp(tipo){
-  var ep = SHEETDB; // plano free: só uma aba
+  var ep=tipo==='sem_email'?SHEETDB+'?sheet=sem_email':SHEETDB;
   fetch(ep,{headers:{'Accept':'application/json'}})
   .then(function(r){return r.json();})
   .then(function(lista){
@@ -266,14 +302,27 @@ function doExp(tipo){
     var headers,rows=[];
     if(tipo==='cadastros'){
       headers=['Nome','Escola','Cargo','E-mail','CPF','CEP','Origem','Status','Data/Hora'];
-      lista.forEach(function(r){rows.push([r.nome,r.escola,r.cargo,r.email,r.cpf,r.cep,r.tipo==='ja_tinha_email'?'Ja tinha':'Criou e voltou',r.status==='concluido'?'Liberado':'Aguardando',fmt(r.dataHora)]);});
+      lista.forEach(function(r){
+        rows.push([r.nome,r.escola,r.cargo,r.email,r.cpf,r.cep,
+          r.tipo==='ja_tinha_email'?'Ja tinha':'Criou e voltou',
+          r.status==='concluido'?'Liberado':'Aguardando',
+          fmt(r.dataHora)]);
+      });
     } else {
       headers=['Nome','Escola','Cargo','Status','Data/Hora'];
-      lista.forEach(function(r){rows.push([r.nome,r.escola,r.cargo,r.statusTipo==='convertido'?'Convertido':'Aguardando e-mail',fmt(r.dataHora)]);});
+      lista.forEach(function(r){
+        rows.push([r.nome,r.escola,r.cargo,
+          r.statusTipo==='convertido'?'Convertido':'Aguardando e-mail',
+          fmt(r.dataHora)]);
+      });
     }
-    var csv=[headers].concat(rows).map(function(row){return row.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}).join(';');}).join('\r\n');
+    var csv=[headers].concat(rows).map(function(row){
+      return row.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}).join(';');
+    }).join('\r\n');
     var blob=new Blob([new Uint8Array([0xEF,0xBB,0xBF]),csv],{type:'text/csv;charset=utf-8;'});
-    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='devlith_'+tipo+'_'+new Date().toISOString().slice(0,10)+'.csv';
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='devlith_'+tipo+'_'+new Date().toISOString().slice(0,10)+'.csv';
     document.body.appendChild(a);a.click();document.body.removeChild(a);
   })
   .catch(function(){alert('Erro ao exportar.');});
@@ -281,7 +330,7 @@ function doExp(tipo){
 
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',function(){reload();setInterval(reload,15000);});
-} else {
+}else{
   reload();
   setInterval(reload,15000);
 }
