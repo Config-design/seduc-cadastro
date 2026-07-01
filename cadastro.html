@@ -414,19 +414,20 @@ function verificar(){
     document.getElementById('res_verif').innerHTML='<div style="color:#EF4444;font-size:13px;">CPF invalido.</div>';
     return;
   }
-  document.getElementById('res_verif').innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;">Consultando...</div>';
-  var cbName = '_ver' + Date.now();
-  window[cbName] = function(dados){
-    try{ delete window[cbName]; }catch(e){}
-    var cpfLimpo = cpf.replace(/\D/g,'');
+  var el = document.getElementById('res_verif');
+  el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;">Consultando...</div>';
+  var cpfLimpo = cpf.replace(/\D/g,'');
+  fetch('https://sheetdb.io/api/v1/2v2qfmfu1nnoh/search?cpf='+encodeURIComponent(cpf),{
+    headers:{'Accept':'application/json'}
+  })
+  .then(function(r){return r.json();})
+  .then(function(lista){
     var found = null;
-    (dados.cadastros||[]).forEach(function(r){
-      if(r.cpf && r.cpf.replace(/\D/g,'')==cpfLimpo) found=r;
-    });
-    (dados.sem_email||[]).forEach(function(r){
-      if(r.cpf && r.cpf.replace(/\D/g,'')==cpfLimpo && !found) found=r;
-    });
-    var el = document.getElementById('res_verif');
+    if(Array.isArray(lista) && lista.length > 0){
+      lista.forEach(function(r){
+        if(r.cpf && r.cpf.replace(/\D/g,'')==cpfLimpo) found=r;
+      });
+    }
     if(!found){
       el.innerHTML='<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:16px;font-size:13px;color:#DC2626;text-align:center;"><strong>CPF nao encontrado.</strong><br/>Voce ainda nao realizou seu cadastro ou o CPF esta incorreto.</div>';
     } else if(found.status==='concluido'){
@@ -434,13 +435,10 @@ function verificar(){
     } else {
       el.innerHTML='<div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;padding:18px;text-align:center;"><span style="font-size:40px;display:block;margin-bottom:10px;">&#128337;</span><strong style="font-size:17px;color:#92400E;display:block;margin-bottom:8px;">Cadastro em andamento</strong><p style="font-size:14px;color:#92400E;line-height:1.7;">Seus dados foram recebidos.<br/>Aguarde em ate 24 horas.</p></div>';
     }
-  };
-  var s = document.createElement('script');
-  s.src = SURL + '?callback=' + cbName + '&t=' + Date.now();
-  s.onerror = function(){
-    document.getElementById('res_verif').innerHTML='<div style="color:#EF4444;font-size:13px;">Erro de conexao. Tente novamente.</div>';
-  };
-  document.head.appendChild(s);
+  })
+  .catch(function(){
+    el.innerHTML='<div style="color:#EF4444;font-size:13px;">Erro de conexao. Tente novamente.</div>';
+  });
 }
 
 function autoEmail(input){

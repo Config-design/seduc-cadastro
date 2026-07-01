@@ -215,16 +215,30 @@ function render(cads, sems){
 }
 
 function liberar(btn, id, nome){
-  if(!confirm('Marcar acesso de "'+nome+'" como liberado?'))return;
-  btn.textContent='Salvando...';btn.disabled=true;
+  if(!confirm('Liberar acesso de "'+nome+'"?'))return;
+  btn.textContent='Salvando...';
+  btn.disabled=true;
+  btn.style.background='#D97706';
   fetch(SHEETDB+'/id/'+encodeURIComponent(id),{
     method:'PATCH',
     headers:{'Content-Type':'application/json','Accept':'application/json'},
     body:JSON.stringify({data:{status:'concluido'}})
   })
-  .then(function(r){return r.json();})
-  .then(function(){setTimeout(reload,800);})
-  .catch(function(){btn.textContent='Erro!';btn.disabled=false;alert('Erro ao liberar.');});
+  .then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  })
+  .then(function(res){
+    btn.textContent='✓ Liberado!';
+    btn.style.background='#16A34A';
+    setTimeout(reload, 1000);
+  })
+  .catch(function(e){
+    btn.textContent='Tentar novamente';
+    btn.disabled=false;
+    btn.style.background='';
+    alert('Erro ao liberar. Verifique sua conexão.');
+  });
 }
 
 function doLimpar(tipo){
