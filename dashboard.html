@@ -124,86 +124,79 @@ td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
   </div>
 </div>
 
+
+
+<!-- Modal de confirmação -->
+<!-- Modal liberacao -->
+<div id="mdl" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:9999;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;padding:28px 24px;width:88%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
+    <p style="font-size:15px;font-weight:600;color:#1E3A5F;margin:0 0 8px;">Liberar acesso</p>
+    <p id="mdl-txt" style="font-size:14px;color:#475569;margin:0 0 24px;line-height:1.6;"></p>
+    <div style="display:flex;gap:10px;">
+      <button onclick="fecharMdl()" style="flex:1;padding:11px;border:1px solid #CBD5E1;border-radius:8px;background:#fff;color:#64748B;font-size:14px;cursor:pointer;">Cancelar</button>
+      <button id="mdl-ok" style="flex:1;padding:11px;border:none;border-radius:8px;background:#1E3A5F;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// v20260701b
 var SHEETDB='https://sheetdb.io/api/v1/2v2qfmfu1nnoh';
 var LINK='https://config-design.github.io/seduc-cadastro/cadastro.html';
 
+function fecharMdl(){
+  document.getElementById('mdl').style.display='none';
+  document.getElementById('mdl-ok').onclick=null;
+}
+
+function liberar(id,nome){
+  document.getElementById('mdl-txt').textContent='Liberar acesso de "'+nome+'"?';
+  document.getElementById('mdl').style.display='block';
+  document.getElementById('mdl-ok').onclick=function(){
+    fecharMdl();
+    var btn=document.getElementById('lb-'+id);
+    if(btn){btn.textContent='Salvando...';btn.disabled=true;btn.style.background='#D97706';}
+    fetch(SHEETDB+'/id/'+encodeURIComponent(id),{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({data:{status:'concluido'}})
+    })
+    .then(function(r){return r.text();})
+    .then(function(){
+      if(btn){btn.textContent='Liberado!';btn.style.background='#16A34A';}
+      setTimeout(reload,1200);
+    })
+    .catch(function(){
+      if(btn){btn.textContent='Tentar novamente';btn.disabled=false;btn.style.background='';}
+    });
+  };
+}
+
 function doCopy(){
   var btn=document.getElementById('btnCopy');
-  function ok(){
-    btn.textContent='Copiado!';
-    btn.classList.add('ok');
-    showFb('Link copiado! Cole no WhatsApp.');
-    setTimeout(function(){
-      btn.textContent='Copiar link';
-      btn.classList.remove('ok');
-      showFb('');
-    },3000);
-  }
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(LINK).then(ok).catch(function(){fb(LINK,ok);});
-  } else {
-    fb(LINK,ok);
-  }
+  function ok(){btn.textContent='Copiado!';btn.classList.add('ok');showFb('Link copiado!');setTimeout(function(){btn.textContent='Copiar link';btn.classList.remove('ok');showFb('');},3000);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(LINK).then(ok).catch(function(){fb(LINK,ok);});}else{fb(LINK,ok);}
 }
-function fb(v,cb){
-  var t=document.createElement('textarea');
-  t.value=v;
-  t.style.cssText='position:fixed;opacity:0;';
-  document.body.appendChild(t);
-  t.select();
-  try{document.execCommand('copy');cb();}catch(e){}
-  document.body.removeChild(t);
-}
+function fb(v,cb){var t=document.createElement('textarea');t.value=v;t.style.cssText='position:fixed;opacity:0;';document.body.appendChild(t);t.select();try{document.execCommand('copy');cb();}catch(e){}document.body.removeChild(t);}
 function showFb(m){document.getElementById('cfb').textContent=m;}
-
-function fmt(v){
-  if(!v||v===''||v==='undefined')return '-';
-  try{
-    var d=new Date(v);
-    if(isNaN(d.getTime()))return String(v);
-    return d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
-  }catch(e){return String(v);}
-}
-function esc(s){
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function fmt(v){if(!v||v===''||v==='undefined')return '-';try{var d=new Date(v);if(isNaN(d.getTime()))return String(v);return d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});}catch(e){return String(v);}}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function reload(){
   var btn=document.getElementById('btnRef');
   if(!btn)return;
-  btn.textContent='Carregando...';
-  btn.classList.add('load');
+  btn.textContent='Carregando...';btn.classList.add('load');
   var cads=[],sems=[],feitos=0;
-  function done(){
-    feitos++;
-    if(feitos===2){
-      btn.textContent='Atualizar';
-      btn.classList.remove('load');
-      render(cads,sems);
-    }
-  }
+  function done(){feitos++;if(feitos===2){btn.textContent='Atualizar';btn.classList.remove('load');render(cads,sems);}}
   fetch(SHEETDB,{headers:{'Accept':'application/json'}})
-    .then(function(r){return r.json();})
-    .then(function(d){if(Array.isArray(d))cads=d;})
-    .catch(function(){})
-    .then(done);
+    .then(function(r){return r.json();}).then(function(d){if(Array.isArray(d))cads=d;}).catch(function(){}).then(done);
   fetch(SHEETDB+'?sheet=sem_email',{headers:{'Accept':'application/json'}})
-    .then(function(r){return r.json();})
-    .then(function(d){if(Array.isArray(d))sems=d;})
-    .catch(function(){})
-    .then(done);
+    .then(function(r){return r.json();}).then(function(d){if(Array.isArray(d))sems=d;}).catch(function(){}).then(done);
 }
 
 function render(cads,sems){
   if(!document.getElementById('kT'))return;
   var sim=0,volt=0,pend=0,conc=0;
-  cads.forEach(function(c){
-    if(c.tipo==='ja_tinha_email')sim++;
-    else if(c.tipo==='criou_e_voltou')volt++;
-    if(c.status==='concluido')conc++;
-  });
+  cads.forEach(function(c){if(c.tipo==='ja_tinha_email')sim++;else if(c.tipo==='criou_e_voltou')volt++;if(c.status==='concluido')conc++;});
   sems.forEach(function(r){if(r.statusTipo!=='convertido')pend++;});
   document.getElementById('kT').textContent=cads.length;
   document.getElementById('kS').textContent=sim;
@@ -212,99 +205,46 @@ function render(cads,sems){
   document.getElementById('kC').textContent=conc;
   document.getElementById('bC').textContent=cads.length;
   document.getElementById('bS').textContent=pend;
-
   var bc=document.getElementById('bCad');
   if(!cads.length){
     bc.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px;">Nenhum cadastro ainda.</td></tr>';
   } else {
-    bc.innerHTML=cads.map(function(c,i){
-      var statusTag=c.status==='concluido'
-        ? '<span class="tag tag-ok">Liberado</span>'
-        : '<span class="tag tag-wait">Aguardando</span>';
+    bc.innerHTML=cads.map(function(c){
+      var stag=c.status==='concluido'?'<span class="tag tag-ok">Liberado</span>':'<span class="tag tag-wait">Aguardando</span>';
       var acao=c.status==='concluido'
-        ? '<span style="color:#16A34A;font-weight:600;">Acesso liberado</span>'
-        : '<button class="blib" onclick="liberar(this,'+JSON.stringify(c.id)+','+JSON.stringify(c.nome)+')">Liberar acesso</button>';
-      return '<tr>'
-        +'<td>'+esc(c.nome)+'</td>'
-        +'<td>'+esc(c.escola)+'</td>'
-        +'<td>'+esc(c.cargo)+'</td>'
-        +'<td>'+esc(c.email)+'</td>'
-        +'<td>'+esc(c.cpf)+'</td>'
-        +'<td>'+esc(c.cep)+'</td>'
-        +'<td>'+esc(c.tipo==='ja_tinha_email'?'Ja tinha':'Criou e voltou')+'</td>'
-        +'<td>'+statusTag+'</td>'
-        +'<td>'+acao+'</td>'
-        +'<td>'+fmt(c.dataHora)+'</td>'
-        +'</tr>';
+        ?'<span style="color:#16A34A;font-weight:600;">Acesso liberado</span>'
+        :'<button class="blib" id="lb-'+esc(c.id)+'" onclick="liberar('+JSON.stringify(c.id)+','+JSON.stringify(c.nome)+')">Liberar acesso</button>';
+      return '<tr><td>'+esc(c.nome)+'</td><td>'+esc(c.escola)+'</td><td>'+esc(c.cargo)+'</td><td>'+esc(c.email)+'</td><td>'+esc(c.cpf)+'</td><td>'+esc(c.cep)+'</td><td>'+esc(c.tipo==='ja_tinha_email'?'Ja tinha':'Criou e voltou')+'</td><td>'+stag+'</td><td>'+acao+'</td><td>'+fmt(c.dataHora)+'</td></tr>';
     }).join('');
   }
-
   var bs=document.getElementById('bSem');
   if(!sems.length){
     bs.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Nenhum usuario sem e-mail.</td></tr>';
   } else {
     bs.innerHTML=sems.map(function(r){
-      return '<tr>'
-        +'<td>'+esc(r.nome)+'</td>'
-        +'<td>'+esc(r.escola)+'</td>'
-        +'<td>'+esc(r.cargo)+'</td>'
-        +'<td>'+(r.statusTipo==='convertido'?'<span class="tag tag-ok">Convertido</span>':'<span class="tag tag-wait">Aguardando e-mail</span>')+'</td>'
-        +'<td>'+fmt(r.dataHora)+'</td>'
-        +'</tr>';
+      return '<tr><td>'+esc(r.nome)+'</td><td>'+esc(r.escola)+'</td><td>'+esc(r.cargo)+'</td><td>'+(r.statusTipo==='convertido'?'<span class="tag tag-ok">Convertido</span>':'<span class="tag tag-wait">Aguardando e-mail</span>')+'</td><td>'+fmt(r.dataHora)+'</td></tr>';
     }).join('');
   }
 }
 
-function liberar(btn,id,nome){
-  var overlay=document.getElementById('modal-overlay');
-  var msg=document.getElementById('modal-msg');
-  var confirmar=document.getElementById('modal-confirmar');
-  var cancelar=document.getElementById('modal-cancelar');
-  msg.textContent='Liberar acesso de '+nome+'? A pessoa sera notificada que seu cadastro esta pronto.';
-  overlay.style.display='flex';
-  function fechar(){overlay.style.display='none';confirmar.onclick=null;cancelar.onclick=null;}
-  cancelar.onclick=fechar;
-  confirmar.onclick=function(){
-    fechar();
-    btn.textContent='Salvando...';
-    btn.disabled=true;
-    btn.style.background='#D97706';
-    fetch(SHEETDB+'/id/'+encodeURIComponent(id),{
-      method:'PATCH',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify({data:{status:'concluido'}})
-    })
-    .then(function(r){return r.text();})
-    .then(function(){
-      btn.textContent='Liberado!';
-      btn.style.background='#16A34A';
-      setTimeout(reload,1000);
-    })
-    .catch(function(){
-      btn.textContent='Tentar novamente';
-      btn.disabled=false;
-      btn.style.background='';
-    });
-  };
-}
-
 function doLimpar(tipo){
-  if(!confirm('Apagar todos os registros? Nao sera possivel recuperar.'))return;
   var ep=tipo==='sem_email'?SHEETDB+'?sheet=sem_email':SHEETDB;
   var chave=tipo==='sem_email'?'nome':'id';
-  fetch(ep,{headers:{'Accept':'application/json'}})
-  .then(function(r){return r.json();})
-  .then(function(lista){
-    if(!lista||!lista.length){reload();return;}
-    return Promise.all(lista.map(function(row){
-      return fetch(ep+'/'+chave+'/'+encodeURIComponent(row[chave]),{
-        method:'DELETE',
-        headers:{'Accept':'application/json'}
-      });
-    }));
-  })
-  .then(function(){setTimeout(reload,800);})
-  .catch(function(){alert('Erro ao limpar.');});
+  document.getElementById('mdl-txt').textContent='Apagar todos os registros de "'+tipo+'"? Nao sera possivel recuperar.';
+  document.getElementById('mdl').style.display='block';
+  document.getElementById('mdl-ok').onclick=function(){
+    fecharMdl();
+    fetch(ep,{headers:{'Accept':'application/json'}})
+    .then(function(r){return r.json();})
+    .then(function(lista){
+      if(!lista||!lista.length){reload();return;}
+      return Promise.all(lista.map(function(row){
+        return fetch(ep+'/'+chave+'/'+encodeURIComponent(row[chave]),{method:'DELETE',headers:{'Accept':'application/json'}});
+      }));
+    })
+    .then(function(){setTimeout(reload,800);})
+    .catch(function(){alert('Erro ao limpar.');});
+  };
 }
 
 function doExp(tipo){
@@ -316,50 +256,23 @@ function doExp(tipo){
     var headers,rows=[];
     if(tipo==='cadastros'){
       headers=['Nome','Escola','Cargo','E-mail','CPF','CEP','Origem','Status','Data/Hora'];
-      lista.forEach(function(r){
-        rows.push([r.nome,r.escola,r.cargo,r.email,r.cpf,r.cep,
-          r.tipo==='ja_tinha_email'?'Ja tinha':'Criou e voltou',
-          r.status==='concluido'?'Liberado':'Aguardando',
-          fmt(r.dataHora)]);
-      });
+      lista.forEach(function(r){rows.push([r.nome,r.escola,r.cargo,r.email,r.cpf,r.cep,r.tipo==='ja_tinha_email'?'Ja tinha':'Criou e voltou',r.status==='concluido'?'Liberado':'Aguardando',fmt(r.dataHora)]);});
     } else {
       headers=['Nome','Escola','Cargo','Status','Data/Hora'];
-      lista.forEach(function(r){
-        rows.push([r.nome,r.escola,r.cargo,
-          r.statusTipo==='convertido'?'Convertido':'Aguardando e-mail',
-          fmt(r.dataHora)]);
-      });
+      lista.forEach(function(r){rows.push([r.nome,r.escola,r.cargo,r.statusTipo==='convertido'?'Convertido':'Aguardando e-mail',fmt(r.dataHora)]);});
     }
-    var csv=[headers].concat(rows).map(function(row){
-      return row.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}).join(';');
-    }).join('\r\n');
+    var csv=[headers].concat(rows).map(function(row){return row.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}).join(';');}).join('\r\n');
     var blob=new Blob([new Uint8Array([0xEF,0xBB,0xBF]),csv],{type:'text/csv;charset=utf-8;'});
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download='devlith_'+tipo+'_'+new Date().toISOString().slice(0,10)+'.csv';
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='devlith_'+tipo+'_'+new Date().toISOString().slice(0,10)+'.csv';
     document.body.appendChild(a);a.click();document.body.removeChild(a);
-  })
-  .catch(function(){alert('Erro ao exportar.');});
+  });
 }
 
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',function(){reload();setInterval(reload,15000);});
 }else{
-  reload();
-  setInterval(reload,15000);
+  reload();setInterval(reload,15000);
 }
 </script>
-
-<!-- Modal de confirmação -->
-<div id="modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:16px;padding:28px 24px;max-width:340px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-    <h3 id="modal-titulo" style="margin:0 0 12px;font-size:18px;color:#1E3A5F;">Confirmar</h3>
-    <p id="modal-msg" style="margin:0 0 24px;font-size:14px;color:#475569;line-height:1.6;"></p>
-    <div style="display:flex;gap:10px;">
-      <button id="modal-cancelar" style="flex:1;padding:10px;border:1px solid #CBD5E1;border-radius:8px;background:#fff;color:#475569;font-size:14px;cursor:pointer;">Cancelar</button>
-      <button id="modal-confirmar" style="flex:1;padding:10px;border:none;border-radius:8px;background:#1E3A5F;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Confirmar</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
