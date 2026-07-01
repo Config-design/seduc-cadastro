@@ -127,7 +127,7 @@ var LINK = 'https://config-design.github.io/seduc-cadastro/cadastro.html';
 
 function doCopy(){
   var btn=document.getElementById('btnCopy');
-  function ok(){btn.textContent='Copiado!';btn.classList.add('ok');showFb('Link copiado! Cole no WhatsApp.');setTimeout(function(){btn.textContent='\u{1F4CB} Copiar link';btn.classList.remove('ok');showFb('');},3000);}
+  function ok(){btn.textContent='Copiado!';btn.classList.add('ok');showFb('Link copiado! Cole no WhatsApp.');setTimeout(function(){btn.textContent='📋 Copiar link';btn.classList.remove('ok');showFb('');},3000);}
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(LINK).then(ok).catch(function(){fb(LINK,ok);});}else{fb(LINK,ok);}
 }
 function fb(v,cb){var t=document.createElement('textarea');t.value=v;t.style.cssText='position:fixed;opacity:0;';document.body.appendChild(t);t.select();try{document.execCommand('copy');cb();}catch(e){}document.body.removeChild(t);}
@@ -142,7 +142,7 @@ function reload(){
   function done(){
     feitos++;
     if(feitos===2){
-      btn.textContent='\u{21BB} Atualizar';btn.classList.remove('load');
+      btn.textContent='↻ Atualizar';btn.classList.remove('load');
       render(cads, sems);
     }
   }
@@ -215,40 +215,29 @@ function render(cads, sems){
 }
 
 function liberar(btn, id, nome){
-  if(!confirm('Liberar acesso de "'+nome+'"?\n\nIsso vai marcar o cadastro como concluido e a pessoa podera ver que foi liberada.'))return;
+  if(!confirm('Liberar acesso de "'+nome+'"?'))return;
   btn.textContent='Salvando...';
   btn.disabled=true;
   btn.style.background='#D97706';
-  // Usa PATCH pelo campo id
   fetch(SHEETDB+'/id/'+encodeURIComponent(id),{
     method:'PATCH',
     headers:{'Content-Type':'application/json','Accept':'application/json'},
     body:JSON.stringify({data:{status:'concluido'}})
   })
-  .then(function(r){ return r.text(); })
-  .then(function(txt){
-    try{
-      var res = JSON.parse(txt);
-      if(res && (res.updated>0 || res.updated==='1' || res.updated===1)){
-        btn.textContent='\u2713 Liberado!';
-        btn.style.background='#16A34A';
-        btn.style.color='white';
-        setTimeout(reload, 1000);
-      } else {
-        throw new Error('Nao atualizou: '+txt);
-      }
-    } catch(e){
-      // Mesmo com resposta inesperada, recarrega para confirmar
-      btn.textContent='\u2713 Liberado!';
-      btn.style.background='#16A34A';
-      setTimeout(reload, 1500);
-    }
+  .then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  })
+  .then(function(res){
+    btn.textContent='✓ Liberado!';
+    btn.style.background='#16A34A';
+    setTimeout(reload, 1000);
   })
   .catch(function(e){
     btn.textContent='Tentar novamente';
     btn.disabled=false;
     btn.style.background='';
-    alert('Erro ao liberar: '+e.message);
+    alert('Erro ao liberar. Verifique sua conexão.');
   });
 }
 
