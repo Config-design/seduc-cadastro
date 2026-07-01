@@ -140,7 +140,8 @@ td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
 </div>
 
 <script>
-var SHEETDB='https://sheetdb.io/api/v1/qzlf5xwl16rr8';
+var SUPA_URL='https://ioswwipjfyuzwcqydtsp.supabase.co';
+var SUPA_KEY='sb_publishable_1UpjBHimrYL-IrOb9HaBzg_gGoBsVd9';
 var LINK='https://config-design.github.io/seduc-cadastro/cadastro.html';
 
 function fecharMdl(){
@@ -155,10 +156,16 @@ function liberar(id,nome){
     fecharMdl();
     var btn=document.getElementById('lb-'+id);
     if(btn){btn.textContent='Salvando...';btn.disabled=true;btn.style.background='#D97706';}
-    fetch(SHEETDB+'/id/'+encodeURIComponent(id),{
+    fetch(SUPA_URL+'/rest/v1/cadastros?id=eq.'+encodeURIComponent(id),{
       method:'PATCH',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify({data:{status:'concluido'}})
+      headers:{
+        'Content-Type':'application/json',
+        'Accept':'application/json',
+        'apikey':SUPA_KEY,
+        'Authorization':'Bearer '+SUPA_KEY,
+        'Prefer':'return=minimal'
+      },
+      body:JSON.stringify({status:'concluido'})
     })
     .then(function(r){return r.text();})
     .then(function(){
@@ -187,10 +194,12 @@ function reload(){
   btn.textContent='Carregando...';btn.classList.add('load');
   var cads=[],sems=[],feitos=0;
   function done(){feitos++;if(feitos===2){btn.textContent='Atualizar';btn.classList.remove('load');render(cads,sems);}}
-  fetch(SHEETDB,{headers:{'Accept':'application/json'}})
-    .then(function(r){return r.json();}).then(function(d){if(Array.isArray(d))cads=d;}).catch(function(){}).then(done);
-  fetch(SHEETDB+'?sheet=sem_email',{headers:{'Accept':'application/json'}})
-    .then(function(r){return r.json();}).then(function(d){if(Array.isArray(d))sems=d;}).catch(function(){}).then(done);
+  fetch(SUPA_URL+'/rest/v1/cadastros?select=*&order=dataHora.asc',{
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Accept':'application/json'}
+  }).then(function(r){return r.json();}).then(function(d){if(Array.isArray(d))cads=d;}).catch(function(){}).then(done);
+  fetch(SUPA_URL+'/rest/v1/sem_email?select=*&order=dataHora.asc',{
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Accept':'application/json'}
+  }).then(function(r){return r.json();}).then(function(d){if(Array.isArray(d))sems=d;}).catch(function(){}).then(done);
 }
 
 function render(cads,sems){
@@ -228,19 +237,14 @@ function render(cads,sems){
 }
 
 function doLimpar(tipo){
-  var ep=tipo==='sem_email'?SHEETDB+'?sheet=sem_email':SHEETDB;
-  var chave=tipo==='sem_email'?'nome':'id';
-  document.getElementById('mdl-txt').textContent='Apagar todos os registros de "'+tipo+'"? Nao sera possivel recuperar.';
+  var tabela=tipo==='sem_email'?'sem_email':'cadastros';
+  document.getElementById('mdl-txt').textContent='Apagar todos os registros? Nao sera possivel recuperar.';
   document.getElementById('mdl').style.display='block';
   document.getElementById('mdl-ok').onclick=function(){
     fecharMdl();
-    fetch(ep,{headers:{'Accept':'application/json'}})
-    .then(function(r){return r.json();})
-    .then(function(lista){
-      if(!lista||!lista.length){reload();return;}
-      return Promise.all(lista.map(function(row){
-        return fetch(ep+'/'+chave+'/'+encodeURIComponent(row[chave]),{method:'DELETE',headers:{'Accept':'application/json'}});
-      }));
+    fetch(SUPA_URL+'/rest/v1/'+tabela+'?id=not.is.null',{
+      method:'DELETE',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Accept':'application/json','Prefer':'return=minimal'}
     })
     .then(function(){setTimeout(reload,800);})
     .catch(function(){alert('Erro ao limpar.');});
@@ -248,8 +252,10 @@ function doLimpar(tipo){
 }
 
 function doExp(tipo){
-  var ep=tipo==='sem_email'?SHEETDB+'?sheet=sem_email':SHEETDB;
-  fetch(ep,{headers:{'Accept':'application/json'}})
+  var tabela_exp=tipo==='sem_email'?'sem_email':'cadastros';
+  fetch(SUPA_URL+'/rest/v1/'+tabela_exp+'?select=*',{
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Accept':'application/json'}
+  })
   .then(function(r){return r.json();})
   .then(function(lista){
     if(!lista||!lista.length){alert('Nenhum dado para exportar.');return;}
