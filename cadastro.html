@@ -8,471 +8,165 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>Acesso ao Sistema - Devlith Educa</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{--brand:#1B4F9B;--brand2:#153d7a;--surface:#F0F4FA;--border:#D1D9E6;--text:#1E293B;--muted:#64748B;--success:#16A34A;--radius:12px;}
-body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:20px 12px 40px;}
-.wrap{width:100%;max-width:480px;}
-.logo-area{text-align:center;margin-bottom:20px;}
-.logo{height:76px;width:auto;max-width:110px;object-fit:contain;display:block;margin:0 auto 10px;}
-.pill{display:inline-flex;align-items:center;gap:7px;background:white;border:1px solid var(--border);border-radius:20px;padding:5px 14px;}
-.pn{font-size:12px;font-weight:700;color:var(--brand);}
-.pd{width:5px;height:5px;border-radius:50%;background:var(--border);}
-.ps{font-size:12px;font-weight:500;color:var(--muted);}
-.prog{display:flex;align-items:center;justify-content:center;margin:16px 0 18px;}
-.pc{width:30px;height:30px;border-radius:50%;border:2px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted);transition:all .25s;flex-shrink:0;}
-.pc.on{border-color:var(--brand);background:var(--brand);color:white;}
-.pc.done{border-color:var(--success);background:var(--success);color:white;}
-.pl{width:44px;height:2px;background:var(--border);transition:background .25s;}
-.pl.done{background:var(--success);}
-.card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:22px 18px;box-shadow:0 2px 16px rgba(27,79,155,.09);}
-.step{display:none;}.step.active{display:block;animation:fi .2s ease;}
-@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
-.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.slabel{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--brand);background:#EFF6FF;border-radius:20px;padding:3px 10px;display:inline-block;}
-.bback{background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;padding:4px 0;font-family:'Inter',sans-serif;}
-h2{font-size:18px;font-weight:700;line-height:1.3;margin-bottom:6px;}
+:root{--brand:#1B4F9B;--surface:#F1F5F9;--border:#E2E8F0;--text:#1E293B;--muted:#64748B;--success:#16A34A;--danger:#DC2626;}
+body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;padding:20px 12px 50px;}
+.wrap{max-width:680px;margin:0 auto;}
+.top{text-align:center;margin-bottom:20px;}
+.logo{font-size:20px;font-weight:800;color:var(--brand);margin-bottom:2px;}
+.logo-sub{font-size:12px;color:var(--muted);}
+.card{background:white;border:1px solid var(--border);border-radius:14px;padding:22px 18px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:16px;}
+h1{font-size:19px;margin-bottom:6px;color:var(--text);}
 .hint{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:18px;}
-.field{margin-bottom:14px;}
-label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;}
-.req{color:#EF4444;margin-left:2px;}
-input[type=text],input[type=email]{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;font-family:'Inter',sans-serif;font-size:16px;color:var(--text);outline:none;transition:border-color .15s;-webkit-appearance:none;background:white;}
-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(27,79,155,.12);}
-input.err{border-color:#EF4444;}
-select.sel{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;font-family:'Inter',sans-serif;font-size:15px;color:var(--text);outline:none;background:white;-webkit-appearance:none;appearance:none;cursor:pointer;}
-select.sel:focus{border-color:var(--brand);}
-select.sel.err{border-color:#EF4444;}
-.ferr{font-size:12px;color:#EF4444;margin-top:4px;display:none;}
-.ferr.show{display:block;}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;border-radius:10px;font-family:'Inter',sans-serif;font-size:16px;font-weight:600;cursor:pointer;border:none;margin-top:10px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.alerta{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,#EEF4FF 0%,#E0EAFE 100%);
+  border:1.5px solid #B9CDF7;
+  border-left:5px solid var(--brand);
+  border-radius:12px;
+  padding:18px 18px 20px;
+  margin-bottom:20px;
+}
+.alerta::before{
+  content:"";
+  position:absolute;
+  top:-20px;
+  right:-20px;
+  width:140px;
+  height:140px;
+  opacity:.10;
+  background-repeat:no-repeat;
+  background-size:contain;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%231B4F9B' d='M32 4 2 18l30 14 24-11.2V36h4V18L32 4Zm-18 20.9V34c0 6.6 8.1 12 18 12s18-5.4 18-12v-9.1l-18 8.4-18-8.4Z'/%3E%3C/svg%3E");
+  transform:rotate(-8deg);
+}
+.alerta-badge{
+  display:inline-block;
+  background:var(--brand);
+  color:white;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.6px;
+  padding:3px 10px;
+  border-radius:20px;
+  margin-bottom:10px;
+}
+.alerta-titulo{
+  font-size:16px;
+  font-weight:800;
+  color:#173B73;
+  margin-bottom:8px;
+  position:relative;
+}
+.alerta-texto{
+  font-size:13.5px;
+  color:#2C4A78;
+  line-height:1.65;
+  margin-bottom:4px;
+  position:relative;
+}
+.alerta-texto strong{color:#173B73;}
+.alerta-cta{
+  position:relative;
+  display:inline-block;
+  background:var(--brand);
+  color:white !important;
+  text-decoration:none;
+  font-size:13.5px;
+  font-weight:700;
+  padding:11px 18px;
+  border-radius:9px;
+  box-shadow:0 2px 8px rgba(27,79,155,.35);
+}
+.iframe-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+iframe{width:100%;height:1900px;border:none;display:block;}
+.linkbtn{display:block;text-align:center;background:none;border:none;color:var(--brand);font-size:14px;font-weight:600;padding:14px 0 4px;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:underline;width:100%;}
+.field{margin-bottom:16px;}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);}
+input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:'Inter',sans-serif;color:var(--text);}
+input:focus{outline:none;border-color:var(--brand);}
+.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
 .btn-p{background:var(--brand);color:white;}
-.btn-p:active{background:var(--brand2);}
-.btn-p:disabled{background:#94a3b8;cursor:not-allowed;}
-.btn-o{background:white;color:var(--brand);border:2px solid var(--brand);margin-top:12px;}
-.btn-w{background:#FFFBEB;color:#92400E;border:2px solid #FCD34D;text-decoration:none;margin-top:10px;}
-.al{border-radius:10px;padding:13px 14px;font-size:13px;line-height:1.6;margin-bottom:16px;}
-.al-b{background:#EFF6FF;border:1px solid #BFDBFE;color:#1D4ED8;}
-.al-w{background:#FFFBEB;border:1px solid #FCD34D;color:#92400E;}
-.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
-.cbtn{border:2px solid var(--border);border-radius:12px;padding:16px 8px;background:white;cursor:pointer;text-align:center;font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;}
-.cbtn:active{transform:scale(.97);}
-.sep{height:1px;background:var(--border);margin:14px 0;}
-.loading{display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;color:var(--muted);padding:30px 0;}
-.spinner{width:22px;height:22px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;}
+.back{background:none;border:none;color:var(--brand);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:14px;padding:0;}
+.err{color:var(--danger);font-size:12px;margin-top:4px;display:none;}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.resumo{margin-top:14px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:13px;font-size:13px;color:#166534;line-height:1.9;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="logo-area">
-    <img src="data:image/png;base64,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nxDcD8WYU2wc25mZmdnZ6dXAugpKloEB7swXxzCfgpYGDAAeO2J+PuWg5W6aY0YpuCs7W+sd4NUOGkUHJ0JHDsLJVdwAy1cbBzufnvhsEW4Ll0A6750+Eg7JLWUw2YV7oQarB6/z4RT2tSL8gmOvix5n7ISdagfzFcEV7MRKAY+GGhrmwejWQu/rt/k87w5hABDL7nRgRIKBKLCnjnQc/o4e/58a/071d+dYihT9rRJsChmvq9ixxfyUmPhgJKXv813scQSLD4FIlGlZ79XUTgR0pA03kPjbnyLeoeOTH/rb2vxCiy7cKa/POsq4FErIxF6JJCn96SPRheFUELaX/szSv+HjvVuwf/8scXzQQxDvCe/R1DBBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEMR/NP8fNdjDnV/lVNEAAAAASUVORK5CYII=" alt="SEDUC Araruama" class="logo"/>
-    <div class="pill"><span class="pn">DEVLITH EDUCA</span><div class="pd"></div><span class="ps">Portal de Acesso</span></div>
+  <div class="top">
+    <div class="logo">DEVLITH EDUCA</div>
+    <div class="logo-sub">Portal de Cadastro - SEDUC Araruama</div>
   </div>
-  <div class="prog">
-    <div class="pc on" id="pc1">1</div><div class="pl" id="pl1"></div>
-    <div class="pc" id="pc2">2</div><div class="pl" id="pl2"></div>
-    <div class="pc" id="pc3">3</div>
+
+  <div class="card" id="viewForm">
+    <h1>Cadastro de acesso ao sistema</h1>
+    <p class="hint">Preencha o formulario abaixo com seus dados. Assim que a Secretaria liberar seu acesso (em ate 24 horas), voce recebera um e-mail com usuario, senha e o link do sistema.</p>
+    <div class="alerta">
+      <div class="alerta-badge">IMPORTANTE</div>
+      <p class="alerta-titulo">Voce ja tem seu e-mail institucional?</p>
+      <p class="alerta-texto">Ele sera o seu <strong>usuario de acesso</strong> ao sistema, entao precisa estar em maos antes de preencher o formulario abaixo. O dominio e <strong>@seduc.araruama.rj.gov.br</strong>.</p>
+      <p class="alerta-texto" style="margin-bottom:12px;">Ainda nao tem? Crie primeiro no site do setor de Informatica da SEDUC:</p>
+      <a class="alerta-cta" href="https://ditei.educacaoararuama.rj.gov.br/cadastro/public/" target="_blank">Criar meu e-mail institucional &#8594;</a>
+    </div>
+    <div class="iframe-wrap">
+      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSc2mIZCyDXk2CuJK6wLo6MTLneOGNs1lUMudM2vS4DIpif5wg/viewform?embedded=true" title="Formulario de cadastro" scrolling="yes">Carregando...</iframe>
+    </div>
+    <button class="linkbtn" onclick="mostrarVerificar()">Ja enviei meu cadastro - verificar status</button>
   </div>
-  <div class="card">
 
-    <!-- S1: Dados -->
-    <div class="step active" id="s1">
-      <div class="sh"><div class="slabel">Passo 1 de 2</div></div>
-      <h2>Seus dados</h2>
-      <p class="hint">Preencha as informacoes abaixo para comecar.</p>
-      <div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:10px;padding:14px;margin-bottom:18px;">
-        <div style="font-size:13px;font-weight:700;color:#15803D;margin-bottom:6px;">&#128269; Ja enviou seus dados antes?</div>
-        <div style="font-size:12px;color:#166534;margin-bottom:10px;line-height:1.5;">Verifique se sua solicitacao foi recebida ou se seu acesso ja foi liberado.</div>
-        <button onclick="goVerif()" style="width:100%;background:#16A34A;color:white;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Verificar status do meu cadastro</button>
-      </div>
-      <div class="field"><label>Nome completo <span class="req">*</span></label>
-        <input type="text" id="nome" placeholder="Maria da Silva Santos" autocomplete="name"/>
-        <div class="ferr" id="e-nome">Informe seu nome completo.</div></div>
-      <div class="field"><label>Escola / Instituicao <span class="req">*</span></label>
-        <select id="escola" class="sel">
-          <option value="">-- Selecione a instituicao --</option>
-          <optgroup label="Casas Creche e Creches">
-            <option value="CASA CRECHE Nº 01 – AREAL">CASA CRECHE Nº 01 – AREAL</option>
-            <option value="CASA CRECHE Nº 02 – XV DE NOVEMBRO">CASA CRECHE Nº 02 – XV DE NOVEMBRO</option>
-            <option value="CASA CRECHE Nº 04 – OUTEIRO">CASA CRECHE Nº 04 – OUTEIRO</option>
-            <option value="CASA CRECHE Nº 05 – OUTEIRO">CASA CRECHE Nº 05 – OUTEIRO</option>
-            <option value="CASA CRECHE Nº 06 – FAZENDINHA">CASA CRECHE Nº 06 – FAZENDINHA</option>
-            <option value="CASA CRECHE Nº 07 – FAZENDINHA">CASA CRECHE Nº 07 – FAZENDINHA</option>
-            <option value="CASA CRECHE Nº 09 – MUTIRÃO">CASA CRECHE Nº 09 – MUTIRÃO</option>
-            <option value="CASA CRECHE Nº 10 – BURACO DO PAU">CASA CRECHE Nº 10 – BURACO DO PAU</option>
-            <option value="CASA CRECHE Nº 13 – RIO DO LIMÃO">CASA CRECHE Nº 13 – RIO DO LIMÃO</option>
-            <option value="CASA CRECHE Nº 16 – FAZENDINHA">CASA CRECHE Nº 16 – FAZENDINHA</option>
-            <option value="CASA CRECHE Nº 17 – CENTRO">CASA CRECHE Nº 17 – CENTRO</option>
-            <option value="CASA CRECHE Nº 19 - PONTINHA DO OUTEIRO">CASA CRECHE Nº 19 - PONTINHA DO OUTEIRO</option>
-            <option value="CASA CRECHE Nº 20 - BOA PERNA">CASA CRECHE Nº 20 - BOA PERNA</option>
-            <option value="CASA CRECHE Nº 21 - BOA PERNA">CASA CRECHE Nº 21 - BOA PERNA</option>
-            <option value="CASA CRECHE Nº 22 - RIO DO LIMÃO">CASA CRECHE Nº 22 - RIO DO LIMÃO</option>
-            <option value="CASA CRECHE Nº 23 - RIO DO LIMÃO">CASA CRECHE Nº 23 - RIO DO LIMÃO</option>
-            <option value="CASA CRECHE Nº 25 - JAPÃO">CASA CRECHE Nº 25 - JAPÃO</option>
-            <option value="CASA CRECHE Nº 26 - BOA VISTA">CASA CRECHE Nº 26 - BOA VISTA</option>
-            <option value="CASA CRECHE Nº 27 - BURACO DO PAU">CASA CRECHE Nº 27 - BURACO DO PAU</option>
-            <option value="CASA CRECHE Nº 28 - SÃO VICENTE">CASA CRECHE Nº 28 - SÃO VICENTE</option>
-            <option value="CASA CRECHE Nº 30 - BANANEIRAS">CASA CRECHE Nº 30 - BANANEIRAS</option>
-            <option value="CASA CRECHE Nº 32 - XV DE NOVEMBRO">CASA CRECHE Nº 32 - XV DE NOVEMBRO</option>
-            <option value="CASA CRECHE Nº 34 - BOA PERNA">CASA CRECHE Nº 34 - BOA PERNA</option>
-            <option value="CASA CRECHE Nº 35 - RIO DO LIMÃO">CASA CRECHE Nº 35 - RIO DO LIMÃO</option>
-            <option value="CASA CRECHE Nº 39 – BOA PERNA">CASA CRECHE Nº 39 – BOA PERNA</option>
-            <option value="CASA CRECHE Nº 40 – JARDIM SÃO PAULO">CASA CRECHE Nº 40 – JARDIM SÃO PAULO</option>
-            <option value="CASA CRECHE Nº 41 – XV DE NOVEMBRO">CASA CRECHE Nº 41 – XV DE NOVEMBRO</option>
-            <option value="CASA CRECHE Nº 42 - VIADUTO">CASA CRECHE Nº 42 - VIADUTO</option>
-            <option value="CASA CRECHE Nº 43 - FAZENDINHA">CASA CRECHE Nº 43 - FAZENDINHA</option>
-            <option value="CASA CRECHE Nº 45 – PARQUE HOTEL">CASA CRECHE Nº 45 – PARQUE HOTEL</option>
-            <option value="CASA CRECHE Nº 48 – PARATI">CASA CRECHE Nº 48 – PARATI</option>
-            <option value="CASA CRECHE Nº 50 - FAZENDINHA">CASA CRECHE Nº 50 - FAZENDINHA</option>
-            <option value="CASA CRECHE Nº 51 - XV DE NOVEMBRO">CASA CRECHE Nº 51 - XV DE NOVEMBRO</option>
-            <option value="CASA CRECHE Nº 52 - AREAL">CASA CRECHE Nº 52 - AREAL</option>
-            <option value="CASA CRECHE Nº 54 - FAZENDINHA">CASA CRECHE Nº 54 - FAZENDINHA</option>
-            <option value="CASA CRECHE Nº 55 - NOVO HORIZONTE">CASA CRECHE Nº 55 - NOVO HORIZONTE</option>
-            <option value="CRECHE M. ADALGIRA OLIVEIRA DE ANDRADE">CRECHE M. ADALGIRA OLIVEIRA DE ANDRADE</option>
-            <option value="CRECHE M. ALEXANDRE MOREIRA MARTINS">CRECHE M. ALEXANDRE MOREIRA MARTINS</option>
-            <option value="CRECHE M. ILCA MARIA DUARTE">CRECHE M. ILCA MARIA DUARTE</option>
-            <option value="CRECHE M. INSPETORA ESCOLAR ROSA MACHADO DOS SANTOS">CRECHE M. INSPETORA ESCOLAR ROSA MACHADO DOS SANTOS</option>
-            <option value="CRECHE M. NORMA DA CONCEIÇÃO MARTINS">CRECHE M. NORMA DA CONCEIÇÃO MARTINS</option>
-            <option value="CRECHE M. PARQUE HOTEL">CRECHE M. PARQUE HOTEL</option>
-            <option value="CRECHE M. SÃO MAXIMILIANO MARIA KOLBE">CRECHE M. SÃO MAXIMILIANO MARIA KOLBE</option>
-            <option value="CRECHE ROBERTO DÓRIA GOMES DE MATTOS">CRECHE ROBERTO DÓRIA GOMES DE MATTOS</option>
-            <option value="CRECHE VEREADOR CIRALDO FERNANDES DA SILVA">CRECHE VEREADOR CIRALDO FERNANDES DA SILVA</option>
-          </optgroup>
-          <optgroup label="Escolas Municipais e Outras">
-            <option value="CENTRO M. DE EDUCAÇÃO MÁRIO REVELLES CASTANHO">CENTRO M. DE EDUCAÇÃO MÁRIO REVELLES CASTANHO</option>
-            <option value="COMPLEXO EDUCACIONAL SALINAS">COMPLEXO EDUCACIONAL SALINAS</option>
-            <option value="E. BILÍNGUE M. OSCARINO PEREIRA DE ANDRADE">E. BILÍNGUE M. OSCARINO PEREIRA DE ANDRADE</option>
-            <option value="E. E.M.Z FAZENDA JAPÃO">E. E.M.Z FAZENDA JAPÃO</option>
-            <option value="E. E.M.Z PARATI">E. E.M.Z PARATI</option>
-            <option value="E. E.M.Z PRODÍGIO">E. E.M.Z PRODÍGIO</option>
-            <option value="E.BILINGUE M. SUELI AMARAL">E.BILINGUE M. SUELI AMARAL</option>
-            <option value="E.M. AGOSTINHO FRANCESCHI">E.M. AGOSTINHO FRANCESCHI</option>
-            <option value="E.M. ANDERSON DOMINGUES DE OLIVEIRA">E.M. ANDERSON DOMINGUES DE OLIVEIRA</option>
-            <option value="E.M. ANDRÉ GOMES DOS SANTOS">E.M. ANDRÉ GOMES DOS SANTOS</option>
-            <option value="E.M. ANTONIO ANDRADE MÜLLER">E.M. ANTONIO ANDRADE MÜLLER</option>
-            <option value="E.M. BRUNNO BARRETO NAMETALA">E.M. BRUNNO BARRETO NAMETALA</option>
-            <option value="E.M. CELINA MESQUITA PEDROSA">E.M. CELINA MESQUITA PEDROSA</option>
-            <option value="E.M. DR. JOÃO VASCONCELLOS">E.M. DR. JOÃO VASCONCELLOS</option>
-            <option value="E.M. ECOLÓGICA FRANCISCO JOSÉ DE MARINS - KIKO">E.M. ECOLÓGICA FRANCISCO JOSÉ DE MARINS - KIKO</option>
-            <option value="E.M. ECOLÓGICA PROFESSOR FÁBIO SIQUEIRA">E.M. ECOLÓGICA PROFESSOR FÁBIO SIQUEIRA</option>
-            <option value="E.M. FAUSTINA SILVA CARVALHO">E.M. FAUSTINA SILVA CARVALHO</option>
-            <option value="E.M. FRANCISCO DOMINGUES NETO">E.M. FRANCISCO DOMINGUES NETO</option>
-            <option value="E.M. HONORINO COUTINHO">E.M. HONORINO COUTINHO</option>
-            <option value="E.M. JERÔNIMO CARLOS NASCIMENTO">E.M. JERÔNIMO CARLOS NASCIMENTO</option>
-            <option value="E.M. JOAQUINA OLIVEIRA RANGEL">E.M. JOAQUINA OLIVEIRA RANGEL</option>
-            <option value="E.M. JOSÉ CORRÊA DA FONSECA">E.M. JOSÉ CORRÊA DA FONSECA</option>
-            <option value="E.M. JOÃO AUGUSTO CHAVES">E.M. JOÃO AUGUSTO CHAVES</option>
-            <option value="E.M. JOÃO BRITO DE SOUZA">E.M. JOÃO BRITO DE SOUZA</option>
-            <option value="E.M. MARGARIDA TRINDADE DE DEUS">E.M. MARGARIDA TRINDADE DE DEUS</option>
-            <option value="E.M. MARIO BUSCEMA">E.M. MARIO BUSCEMA</option>
-            <option value="E.M. MENINO ROBSON JUNIOR">E.M. MENINO ROBSON JUNIOR</option>
-            <option value="E.M. NEDIR PAULO BARROSO DA ROSA">E.M. NEDIR PAULO BARROSO DA ROSA</option>
-            <option value="E.M. PASTOR ALCEBÍADES FERREIRA DE MENDONÇA">E.M. PASTOR ALCEBÍADES FERREIRA DE MENDONÇA</option>
-            <option value="E.M. PROF. CARLOS LEAL">E.M. PROF. CARLOS LEAL</option>
-            <option value="E.M. PROFESSOR DARCY RIBEIRO">E.M. PROFESSOR DARCY RIBEIRO</option>
-            <option value="E.M. PROFESSOR ORLANDO DIAS RIBEIRO">E.M. PROFESSOR ORLANDO DIAS RIBEIRO</option>
-            <option value="E.M. PROFESSOR PEDRO PAULO DE BRAGANÇA PIMENTEL">E.M. PROFESSOR PEDRO PAULO DE BRAGANÇA PIMENTEL</option>
-            <option value="E.M. PROFESSOR RAYMUNDO MAGNO CAMARÃO">E.M. PROFESSOR RAYMUNDO MAGNO CAMARÃO</option>
-            <option value="E.M. PROFESSORA NAIR VALLADARES">E.M. PROFESSORA NAIR VALLADARES</option>
-            <option value="E.M. PROFª HEGLÁUCIA MARIA DE MELLO MATTA">E.M. PROFª HEGLÁUCIA MARIA DE MELLO MATTA</option>
-            <option value="E.M. SARA URRUTIA BAPTISTA">E.M. SARA URRUTIA BAPTISTA</option>
-            <option value="E.M. SINVAL PINTO DE FIGUEIREDO">E.M. SINVAL PINTO DE FIGUEIREDO</option>
-            <option value="E.M. TONINHO SENRA">E.M. TONINHO SENRA</option>
-            <option value="E.M. VER. ALCEBÍADES CARVALHO DAS FLORES">E.M. VER. ALCEBÍADES CARVALHO DAS FLORES</option>
-            <option value="E.M. VEREADOR EDEMUNDO PEREIRA DE SÁ CARVALHO">E.M. VEREADOR EDEMUNDO PEREIRA DE SÁ CARVALHO</option>
-            <option value="E.M. VEREADOR MOYSÉS RAMALHO">E.M. VEREADOR MOYSÉS RAMALHO</option>
-            <option value="ESCOLA BILÍNGUE M. PROFESSOR JOÃO RAPOSO">ESCOLA BILÍNGUE M. PROFESSOR JOÃO RAPOSO</option>
-            <option value="ESCOLA ESTADUAL MUNICIPALIZADA PONTA DO CAPIM">ESCOLA ESTADUAL MUNICIPALIZADA PONTA DO CAPIM</option>
-            <option value="NOVA ESCOLA ECOLÓGICA M. PREFEITO ALTEVIR BARRETO">NOVA ESCOLA ECOLÓGICA M. PREFEITO ALTEVIR BARRETO</option>
-            <option value="PRAÇA ESCOLA ECOLÓGICA M DR. FERNANDO CARVALHO">PRAÇA ESCOLA ECOLÓGICA M DR. FERNANDO CARVALHO</option>
-            <option value="PRAÇA ESCOLA IGUABINHA - MARCOS HERON CORRÊA">PRAÇA ESCOLA IGUABINHA - MARCOS HERON CORRÊA</option>
-            <option value="PRAÇA ESCOLA ITATIQUARA - PREF. AFRÂNIO VALADARES">PRAÇA ESCOLA ITATIQUARA - PREF. AFRÂNIO VALADARES</option>
-            <option value="PRAÇA ESCOLA PRAIA SECA - COMANDANTE SÉRGIO RIBEIRO">PRAÇA ESCOLA PRAIA SECA - COMANDANTE SÉRGIO RIBEIRO</option>
-          </optgroup>
-        </select>
-        <div class="ferr" id="e-escola">Selecione sua escola.</div></div>
-      <div class="field"><label>Cargo <span class="req">*</span></label>
-        <input type="text" id="cargo" placeholder="Professor, Coordenador, Diretor..."/>
-        <div class="ferr" id="e-cargo">Informe seu cargo.</div></div>
-      <button class="btn btn-p" onclick="goS2()">Continuar</button>
+  <div class="card" id="viewVerif" style="display:none;">
+    <button class="back" onclick="mostrarForm()">&#8592; Voltar ao cadastro</button>
+    <h1>Verificar meu cadastro</h1>
+    <p class="hint">Digite seu CPF para consultar se o seu acesso ja foi liberado.</p>
+    <div class="field">
+      <label>CPF</label>
+      <input type="text" id="cpf_v" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" oninput="mCPF2(this)"/>
+      <div class="err" id="err_cpf">Digite um CPF valido.</div>
     </div>
-
-    <!-- S2: Tem email? -->
-    <div class="step" id="s2">
-      <div class="sh"><div class="slabel">Passo 2 de 2</div><button class="bback" onclick="goS1()">&#8592; Voltar</button></div>
-      <h2>Voce possui e-mail institucional?</h2>
-      <div class="al al-b">Para acessar o sistema <strong>Devlith Educa</strong> e obrigatorio ter e-mail terminando em <strong>@seduc.araruama.rj.gov.br</strong></div>
-      <div class="cgrid">
-        <button class="cbtn" onclick="escolha('sim')"><span style="font-size:26px;display:block;margin-bottom:7px;">&#9989;</span><span style="font-size:13px;font-weight:700;display:block;">Sim, ja tenho</span><span style="font-size:11px;color:var(--muted);margin-top:3px;display:block;">Meu e-mail esta ativo</span></button>
-        <button class="cbtn" onclick="escolha('nao')"><span style="font-size:26px;display:block;margin-bottom:7px;">&#10060;</span><span style="font-size:13px;font-weight:700;display:block;">Nao tenho ainda</span><span style="font-size:11px;color:var(--muted);margin-top:3px;display:block;">Preciso criar meu e-mail</span></button>
-      </div>
-    </div>
-
-    <!-- S3A: Nao tem email -->
-    <div class="step" id="s3a">
-      <div class="sh"><div class="slabel">Acao necessaria</div><button class="bback" onclick="goS2()">&#8592; Voltar</button></div>
-      <h2>Crie seu e-mail institucional</h2>
-      <div class="al al-w">Voce precisara de um e-mail institucional para acessar o sistema.<br/>Crie o seu e-mail e depois volte aqui para finalizar o cadastro.</div>
-      <p style="font-size:13px;color:#475569;font-weight:500;margin-bottom:6px;">Acesse o portal para criar seu e-mail:</p>
-      <a href="https://ditei.educacaoararuama.rj.gov.br/cadastro" target="_blank" class="btn btn-w" style="display:flex;align-items:center;justify-content:center;">Criar e-mail institucional</a>
-      <div class="sep"></div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:2px;">Nao tem acesso agora? Registre sua solicitacao:</p>
-      <button class="btn btn-p" id="btnSemEmail" onclick="confirmarSemEmail()">Registrar solicitacao de e-mail</button>
-      <div class="sep"></div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:2px;">Ja criou? Volte e finalize aqui:</p>
-      <button class="btn btn-o" onclick="voltou()">Ja tenho meu e-mail - Finalizar</button>
-    </div>
-
-    <!-- S3B: Formulario final -->
-    <div class="step" id="s3b">
-      <div class="sh"><div class="slabel">Finalizando</div><button class="bback" onclick="goS2()">&#8592; Voltar</button></div>
-      <h2>Dados para acesso</h2>
-      <p class="hint">Informe seu e-mail institucional, CPF e CEP.</p>
-      <div class="field"><label>E-mail institucional <span class="req">*</span></label>
-        <input type="text" id="email" placeholder="nome@seduc.araruama.rj.gov.br" inputmode="email" autocorrect="off" autocapitalize="none" spellcheck="false" oninput="autoEmail(this)" onkeydown="emailKey(event)"/>
-        <div id="email-sug" onclick="aceitarSug()" style="display:none;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px;padding:10px 14px;font-size:14px;color:var(--brand);cursor:pointer;margin-top:4px;font-weight:500;"></div>
-        <div class="ferr" id="e-email">Informe um e-mail valido.</div></div>
-      <div class="field"><label>E-mail pessoal <span class="req">*</span></label>
-        <input type="text" id="emailPessoal" placeholder="seuemail@gmail.com" inputmode="email" autocorrect="off" autocapitalize="none" spellcheck="false"/>
-        <div class="ferr" id="e-emailPessoal">Informe um e-mail valido.</div></div>
-      <div class="field"><label>CPF <span class="req">*</span></label>
-        <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" oninput="mCPF(this)"/>
-        <div class="ferr" id="e-cpf">CPF invalido.</div></div>
-      <div class="field"><label>CEP <span class="req">*</span></label>
-        <input type="text" id="cep" placeholder="00000-000" maxlength="9" inputmode="numeric" oninput="mCEP(this)"/>
-        <div class="ferr" id="e-cep">CEP invalido.</div></div>
-      <button class="btn btn-p" id="btnFin" onclick="finalizar()">Enviar cadastro</button>
-    </div>
-
-    <!-- S4sem: Confirmacao sem email -->
-    <div class="step" id="s4sem">
-      <div style="text-align:center;padding:24px 0;">
-        <div style="font-size:48px;margin-bottom:12px;">📋</div>
-        <h2 style="color:#1E3A5F;margin-bottom:12px;">Solicitacao registrada!</h2>
-        <div class="al al-w" style="text-align:left;">
-          Sua solicitacao de criacao de e-mail foi registrada.<br/>
-          A equipe da Devlith entrara em contato em ate 24 horas.
-        </div>
-        <div class="sep"></div>
-        <p style="font-size:13px;color:var(--muted);">Apos criar seu e-mail, volte a este link e clique em <strong>"Verificar status"</strong> para acompanhar.</p>
-      </div>
-    </div>
-
-    <!-- S4: Aguardando -->
-    <div class="step" id="s4">
-      <div style="text-align:center;padding:8px 0;">
-        <span style="font-size:50px;display:block;margin-bottom:12px;">&#128337;</span>
-        <h3 style="font-size:20px;font-weight:700;color:var(--brand);margin-bottom:8px;">Recebemos seus dados para cadastro!</h3>
-        <p style="font-size:15px;color:var(--text);line-height:1.8;margin-bottom:16px;">Aguarde em ate <strong>24 horas</strong> que a equipe da Devlith realize seu cadastro no sistema.</p>
-        <div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:12px;padding:14px;font-size:13px;color:#1D4ED8;line-height:1.7;margin-bottom:16px;">
-          Para acompanhar sua solicitacao, acesse novamente este link e clique em <strong>"Verificar status"</strong>.
-        </div>
-        <div class="resumo" id="resumo"></div>
-        <button onclick="goVerif()" style="width:100%;background:var(--brand);color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;margin-top:14px;">Verificar status do meu cadastro</button>
-      </div>
-    </div>
-
-    <!-- S5: Loading -->
-    <div class="step" id="sload">
-      <div class="loading"><div class="spinner"></div>Salvando seus dados...</div>
-    </div>
-
-    <!-- S6: Verificar status -->
-    <div class="step" id="sverif">
-      <div class="sh"><div class="slabel">Verificar status</div><button class="bback" onclick="goS1()">&#8592; Voltar</button></div>
-      <h2>Verificar meu cadastro</h2>
-      <p class="hint">Digite seu CPF para consultar o status do seu acesso ao Devlith Educa.</p>
-      <div class="field"><label>CPF <span class="req">*</span></label>
-        <input type="text" id="cpf_v" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" oninput="mCPF2(this)"/>
-      </div>
-      <button class="btn btn-p" onclick="verificar()">Consultar</button>
-      <div id="res_verif" style="margin-top:16px;"></div>
-    </div>
-
+    <button class="btn btn-p" onclick="verificar()">Consultar</button>
+    <div id="res_verif" style="margin-top:16px;"></div>
   </div>
 </div>
-<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" title="envio"></iframe>
+
 <script>
-// Envio via Google Forms (sem CORS, sem limite de requisicoes)
-var FORM_ACTION='https://docs.google.com/forms/d/e/1FAIpQLSc2mIZCyDXk2CuJK6wLo6MTLneOGNs1lUMudM2vS4DIpif5wg/formResponse';
 var CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR2kgp6KtuQ83H62gD863Xmc50cHAn3o1IVBeKPlVPhXJgjYNM0J3UgvV5DupkDy-519crXfAnLUpZB/pub?gid=909378355&single=true&output=csv';
 var LINK_SISTEMA='https://devlitheduca.com/';
-var ENTRY={
-  nome:'entry.1259662856',
-  cargo:'entry.789488069',
-  email:'entry.299311754',
-  emailPessoal:'entry.1522206389',
-  cpf:'entry.360982203',
-  cep:'entry.1024104584',
-  escola:'entry.2114375194'
-};
-var fluxo=null,di={};
 
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
-
-function setProg(c1,c2,c3,l1,l2){
-  var cs=[c1,c2,c3];
-  for(var i=0;i<3;i++){
-    var el=document.getElementById('pc'+(i+1));
-    el.className='pc';el.textContent=String(i+1);
-    if(cs[i]==='on')el.classList.add('on');
-    if(cs[i]==='d'){el.classList.add('done');el.textContent='ok';}
-  }
-  var ls=[l1,l2];
-  for(var i=0;i<2;i++){
-    var el=document.getElementById('pl'+(i+1));
-    el.className='pl';
-    if(ls[i]==='d')el.classList.add('done');
-  }
+function mostrarVerificar(){
+  document.getElementById('viewForm').style.display='none';
+  document.getElementById('viewVerif').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-
-function showStep(id,c1,c2,c3,l1,l2){
-  document.querySelectorAll('.step').forEach(function(s){s.classList.remove('active');});
-  document.getElementById(id).classList.add('active');
-  setProg(c1,c2,c3,l1,l2);
+function mostrarForm(){
+  document.getElementById('viewVerif').style.display='none';
+  document.getElementById('viewForm').style.display='block';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function chk(campos){
-  var ok=true;
-  campos.forEach(function(c){
-    var el=document.getElementById(c.id),er=document.getElementById(c.eid);
-    var v=c.fn(el.value);
-    el.classList.toggle('err',!v);er.classList.toggle('show',!v);
-    if(!v)ok=false;
-  });
-  return ok;
+function mCPF2(el){
+  var v=el.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>9) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+  else if(v.length>6) v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+  else if(v.length>3) v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+  el.value=v;
 }
 
-function goS1(){showStep('s1','on','','','','');}
-
-function goS2(){
-  if(!chk([
-    {id:'nome',eid:'e-nome',fn:function(v){return v.trim().length>=3;}},
-    {id:'escola',eid:'e-escola',fn:function(v){return v.trim().length>=2;}},
-    {id:'cargo',eid:'e-cargo',fn:function(v){return v.trim().length>=2;}}
-  ]))return;
-  di={
-    nome:document.getElementById('nome').value.trim(),
-    escola:document.getElementById('escola').value.trim(),
-    cargo:document.getElementById('cargo').value.trim()
-  };
-  showStep('s2','d','on','','d','');
-}
-
-function goVerif(){showStep('sverif','on','','','','');}
-
-function escolha(op){
-  fluxo=op;
-  if(op==='nao'){
-    // So mostra a tela - salva so quando clicar Confirmar
-    showStep('s3a','d','d','on','d','d');
-  } else {
-    showStep('s3b','d','d','on','d','d');
-  }
-}
-
-function confirmarSemEmail(){
-  var btn = document.getElementById('btnSemEmail');
-  if(btn) btn.disabled=true;
-  // Nao envia nada para a planilha aqui: sem CPF e sem e-mail, essa linha
-  // nao poderia ser localizada nem liberada depois. O cadastro de verdade
-  // acontece em finalizar(), quando a pessoa voltar com o e-mail criado.
-  showStep('s4sem','d','d','d','d','d');
-}
-
-function voltou(){fluxo='voltou';showStep('s3b','d','d','on','d','d');}
-
-function finalizar(){
-  if(!chk([
-    {id:'email',eid:'e-email',fn:function(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}},
-    {id:'emailPessoal',eid:'e-emailPessoal',fn:function(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}},
-    {id:'cpf',eid:'e-cpf',fn:function(v){return valCPF(v);}},
-    {id:'cep',eid:'e-cep',fn:function(v){return /^\d{5}-\d{3}$/.test(v);}}
-  ]))return;
-  document.getElementById('btnFin').disabled=true;
-  showStep('sload','d','d','on','d','d');
-  var reg={
-    id:uid(),
-    tipo:fluxo==='voltou'?'criou_e_voltou':'ja_tinha_email',
-    nome:di.nome,escola:di.escola,cargo:di.cargo,
-    cpf:document.getElementById('cpf').value.trim(),
-    email:document.getElementById('email').value.trim(),
-    emailPessoal:document.getElementById('emailPessoal').value.trim(),
-    cep:document.getElementById('cep').value.trim(),
-    status:'aguardando',
-    dataHora:new Date().toISOString()
-  };
-  enviarGET(reg,function(ok){
-    if(ok){
-      document.getElementById('resumo').innerHTML=
-        '<strong>Resumo:</strong><br/>Nome: '+reg.nome+
-        '<br/>Escola: '+reg.escola+'<br/>Cargo: '+reg.cargo+
-        '<br/>E-mail institucional: '+reg.email+'<br/>E-mail pessoal: '+reg.emailPessoal+'<br/>CPF: '+reg.cpf+'<br/>CEP: '+reg.cep;
-      showStep('s4','d','d','d','d','d');
-    } else {
-      document.getElementById('btnFin').disabled=false;
-      showStep('s3b','d','d','on','d','d');
-      alert('Erro ao enviar. Verifique sua conexao e tente novamente.');
-    }
-  });
-}
-
-// Envia dados via Google Forms (fetch no-cors, sem depender de CORS/API keys)
-// Envia dados criando um <form> real que aponta para um iframe escondido.
-// Isso e diferente de fetch(): e literalmente a mesma coisa que acontece quando
-// uma pessoa preenche o Google Forms de verdade e aperta enviar, entao nao
-// depende de CORS, tipo de codificacao do corpo, nem de detalhes internos do
-// endpoint do Google que podem mudar sem aviso.
-function enviarGET(dados, cb){
-  try{
-    var form = document.createElement('form');
-    form.action = FORM_ACTION;
-    form.method = 'POST';
-    form.target = 'hidden_iframe';
-    form.style.display = 'none';
-
-    function addField(entryId, valor){
-      var input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = entryId;
-      input.value = valor || '';
-      form.appendChild(input);
-    }
-    addField(ENTRY.nome, dados.nome);
-    addField(ENTRY.escola, dados.escola);
-    addField(ENTRY.cargo, dados.cargo);
-    addField(ENTRY.email, dados.email);
-    addField(ENTRY.emailPessoal, dados.emailPessoal);
-    addField(ENTRY.cpf, dados.cpf);
-    addField(ENTRY.cep, dados.cep);
-
-    document.body.appendChild(form);
-
-    var iframe = document.getElementById('hidden_iframe');
-    var finalizado = false;
-    function finish(ok){
-      if(finalizado) return;
-      finalizado = true;
-      iframe.onload = null;
-      if(form.parentNode) form.parentNode.removeChild(form);
-      cb(ok);
-    }
-
-    iframe.onload = function(){ finish(true); };
-    form.submit();
-    // Reserva: em alguns navegadores o onload de iframe cross-origin pode nao disparar.
-    setTimeout(function(){ finish(true); }, 2500);
-  }catch(e){
-    cb(false);
-  }
-}
-
-function limpar(id){
-  try{ delete window[id]; }catch(e){}
-  var el = document.getElementById(id);
-  if(el) el.parentNode.removeChild(el);
+function valCPF(cpf){
+  cpf=String(cpf||'').replace(/\D/g,'');
+  if(cpf.length!==11||/^(\d)\1{10}$/.test(cpf)) return false;
+  var soma=0,resto;
+  for(var i=1;i<=9;i++) soma+=parseInt(cpf.substring(i-1,i))*(11-i);
+  resto=(soma*10)%11; if(resto===10||resto===11) resto=0;
+  if(resto!==parseInt(cpf.substring(9,10))) return false;
+  soma=0;
+  for(i=1;i<=10;i++) soma+=parseInt(cpf.substring(i-1,i))*(12-i);
+  resto=(soma*10)%11; if(resto===10||resto===11) resto=0;
+  if(resto!==parseInt(cpf.substring(10,11))) return false;
+  return true;
 }
 
 function parseCSVcad(text){
@@ -498,7 +192,6 @@ function parseCSVcad(text){
 function normHeader(s){
   return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 }
-
 function findCol(headers, alvo){
   for(var i=0;i<headers.length;i++){
     if(normHeader(headers[i]).indexOf(alvo)>=0) return i;
@@ -506,15 +199,17 @@ function findCol(headers, alvo){
   return -1;
 }
 
-// Verifica status por CPF consultando a planilha publicada como CSV
 function verificar(){
   var cpf = document.getElementById('cpf_v').value.trim();
+  var errEl = document.getElementById('err_cpf');
   if(!valCPF(cpf)){
-    document.getElementById('res_verif').innerHTML='<div style="color:#EF4444;font-size:13px;">CPF invalido.</div>';
+    errEl.style.display='block';
     return;
   }
+  errEl.style.display='none';
+
   var el = document.getElementById('res_verif');
-  el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;"><span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span>Consultando...</div>';
+  el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;"><span class="spinner"></span>Consultando...</div>';
   var cpfLimpo = cpf.replace(/\D/g,'');
 
   fetch(CSV_URL+'&_ts='+Date.now())
@@ -534,7 +229,7 @@ function verificar(){
       });
 
       if(!found){
-        el.innerHTML='<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:16px;font-size:13px;color:#DC2626;text-align:center;"><strong>CPF nao encontrado.</strong><br/>Voce ainda nao concluiu seu cadastro ou o CPF esta incorreto.</div>';
+        el.innerHTML='<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:16px;font-size:13px;color:#DC2626;text-align:center;"><strong>CPF nao encontrado.</strong><br/>Seu cadastro pode ainda nao ter sido processado. Se enviou ha poucos minutos, aguarde e tente novamente.</div>';
         return;
       }
 
@@ -566,60 +261,6 @@ function verificar(){
       el.innerHTML='<div style="color:#EF4444;font-size:13px;">Erro de conexao. Tente novamente.</div>';
     });
 }
-
-function autoEmail(input){
-  var v=input.value, sug=document.getElementById('email-sug');
-  if(v.indexOf('@')>=0 && v.indexOf('@seduc')<0){
-    var sugestao = v.split('@')[0]+'@seduc.araruama.rj.gov.br';
-    sug.innerHTML='&#128073; Usar: <strong>'+sugestao+'</strong>';
-    sug.style.display='block';
-    sug._val=sugestao;
-  } else {
-    sug.style.display='none';
-  }
-}
-function aceitarSug(){
-  var sug=document.getElementById('email-sug');
-  document.getElementById('email').value=sug._val;
-  sug.style.display='none';
-}
-function emailKey(e){
-  var sug=document.getElementById('email-sug');
-  if((e.key==='Tab'||e.key==='Enter')&&sug.style.display!=='none'){e.preventDefault();aceitarSug();}
-  if(e.key==='Escape')sug.style.display='none';
-}
-function mCPF(i){
-  var v=i.value.replace(/\D/g,'').slice(0,11);
-  if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
-  else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
-  else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
-  i.value=v;
-}
-function mCPF2(i){
-  var v=i.value.replace(/\D/g,'').slice(0,11);
-  if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
-  else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
-  else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
-  i.value=v;
-}
-function mCEP(i){
-  var v=i.value.replace(/\D/g,'').slice(0,8);
-  if(v.length>5)v=v.replace(/(\d{5})(\d{1,3})/,'$1-$2');
-  i.value=v;
-}
-function valCPF(cpf){
-  cpf=cpf.replace(/\D/g,'');
-  if(cpf.length!==11||/^(\d)\1+$/.test(cpf))return false;
-  var s=0,r;
-  for(var i=0;i<9;i++)s+=+cpf[i]*(10-i);
-  r=(s*10)%11;if(r>=10)r=0;if(r!==+cpf[9])return false;
-  s=0;
-  for(var i=0;i<10;i++)s+=+cpf[i]*(11-i);
-  r=(s*10)%11;if(r>=10)r=0;
-  return r===+cpf[10];
-}
 </script>
-
-
 </body>
 </html>
