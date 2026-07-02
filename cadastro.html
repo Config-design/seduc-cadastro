@@ -2,6 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>Acesso ao Sistema - Devlith Educa</title>
 <style>
@@ -289,6 +292,7 @@ select.sel.err{border-color:#EF4444;}
 
   </div>
 </div>
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" title="envio"></iframe>
 <script>
 // Envio via Google Forms (sem CORS, sem limite de requisicoes)
 var FORM_ACTION='https://docs.google.com/forms/d/e/1FAIpQLSc2mIZCyDXk2CuJK6wLo6MTLneOGNs1lUMudM2vS4DIpif5wg/formResponse';
@@ -372,13 +376,10 @@ function escolha(op){
 function confirmarSemEmail(){
   var btn = document.getElementById('btnSemEmail');
   if(btn) btn.disabled=true;
-  showStep('sload','d','d','on','d','d');
-  var reg={tipo:'sem_email',nome:di.nome,escola:di.escola,cargo:di.cargo,
-           status:'Aguardando criacao de e-mail',statusTipo:'pendente',
-           dataHora:new Date().toISOString()};
-  enviarGET(reg,function(ok){
-    showStep('s4sem','d','d','d','d','d');
-  });
+  // Nao envia nada para a planilha aqui: sem CPF e sem e-mail, essa linha
+  // nao poderia ser localizada nem liberada depois. O cadastro de verdade
+  // acontece em finalizar(), quando a pessoa voltar com o e-mail criado.
+  showStep('s4sem','d','d','d','d','d');
 }
 
 function voltou(){fluxo='voltou';showStep('s3b','d','d','on','d','d');}
@@ -419,31 +420,50 @@ function finalizar(){
 }
 
 // Envia dados via Google Forms (fetch no-cors, sem depender de CORS/API keys)
-function enviarGET(dados, cb, tentativa){
-  tentativa = tentativa || 1;
+// Envia dados criando um <form> real que aponta para um iframe escondido.
+// Isso e diferente de fetch(): e literalmente a mesma coisa que acontece quando
+// uma pessoa preenche o Google Forms de verdade e aperta enviar, entao nao
+// depende de CORS, tipo de codificacao do corpo, nem de detalhes internos do
+// endpoint do Google que podem mudar sem aviso.
+function enviarGET(dados, cb){
   try{
-    var fd = new FormData();
-    fd.append(ENTRY.nome, dados.nome || '');
-    fd.append(ENTRY.escola, dados.escola || '');
-    fd.append(ENTRY.cargo, dados.cargo || '');
-    fd.append(ENTRY.email, dados.email || '');
-    fd.append(ENTRY.emailPessoal, dados.emailPessoal || '');
-    fd.append(ENTRY.cpf, dados.cpf || '');
-    fd.append(ENTRY.cep, dados.cep || '');
+    var form = document.createElement('form');
+    form.action = FORM_ACTION;
+    form.method = 'POST';
+    form.target = 'hidden_iframe';
+    form.style.display = 'none';
 
-    fetch(FORM_ACTION, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: fd
-    })
-    .then(function(){ cb(true); })
-    .catch(function(){
-      if(tentativa < 3){
-        setTimeout(function(){ enviarGET(dados, cb, tentativa+1); }, 2000);
-      } else {
-        cb(false);
-      }
-    });
+    function addField(entryId, valor){
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = entryId;
+      input.value = valor || '';
+      form.appendChild(input);
+    }
+    addField(ENTRY.nome, dados.nome);
+    addField(ENTRY.escola, dados.escola);
+    addField(ENTRY.cargo, dados.cargo);
+    addField(ENTRY.email, dados.email);
+    addField(ENTRY.emailPessoal, dados.emailPessoal);
+    addField(ENTRY.cpf, dados.cpf);
+    addField(ENTRY.cep, dados.cep);
+
+    document.body.appendChild(form);
+
+    var iframe = document.getElementById('hidden_iframe');
+    var finalizado = false;
+    function finish(ok){
+      if(finalizado) return;
+      finalizado = true;
+      iframe.onload = null;
+      if(form.parentNode) form.parentNode.removeChild(form);
+      cb(ok);
+    }
+
+    iframe.onload = function(){ finish(true); };
+    form.submit();
+    // Reserva: em alguns navegadores o onload de iframe cross-origin pode nao disparar.
+    setTimeout(function(){ finish(true); }, 2500);
   }catch(e){
     cb(false);
   }
