@@ -22,9 +22,9 @@ h1{font-size:19px;margin-bottom:6px;color:var(--text);}
 .alerta{
   position:relative;
   overflow:hidden;
-  background:linear-gradient(135deg,#EEF4FF 0%,#E0EAFE 100%);
-  border:1.5px solid #B9CDF7;
-  border-left:5px solid var(--brand);
+  background:linear-gradient(135deg,#FFF1F0 0%,#FFE4D6 100%);
+  border:1.5px solid #FCA5A5;
+  border-left:5px solid #DC2626;
   border-radius:12px;
   padding:18px 18px 20px;
   margin-bottom:20px;
@@ -36,15 +36,15 @@ h1{font-size:19px;margin-bottom:6px;color:var(--text);}
   right:-20px;
   width:140px;
   height:140px;
-  opacity:.10;
+  opacity:.12;
   background-repeat:no-repeat;
   background-size:contain;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%231B4F9B' d='M32 4 2 18l30 14 24-11.2V36h4V18L32 4Zm-18 20.9V34c0 6.6 8.1 12 18 12s18-5.4 18-12v-9.1l-18 8.4-18-8.4Z'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23DC2626' d='M32 4 2 18l30 14 24-11.2V36h4V18L32 4Zm-18 20.9V34c0 6.6 8.1 12 18 12s18-5.4 18-12v-9.1l-18 8.4-18-8.4Z'/%3E%3C/svg%3E");
   transform:rotate(-8deg);
 }
 .alerta-badge{
   display:inline-block;
-  background:var(--brand);
+  background:#DC2626;
   color:white;
   font-size:10px;
   font-weight:800;
@@ -56,33 +56,56 @@ h1{font-size:19px;margin-bottom:6px;color:var(--text);}
 .alerta-titulo{
   font-size:16px;
   font-weight:800;
-  color:#173B73;
+  color:#111111;
   margin-bottom:8px;
   position:relative;
 }
 .alerta-texto{
   font-size:13.5px;
-  color:#2C4A78;
+  color:#1A1A1A;
   line-height:1.65;
   margin-bottom:4px;
   position:relative;
 }
-.alerta-texto strong{color:#173B73;}
+.alerta-texto strong{color:#000000;}
 .alerta-cta{
   position:relative;
   display:inline-block;
-  background:var(--brand);
+  background:linear-gradient(135deg,#DC2626,#EA580C);
   color:white !important;
   text-decoration:none;
   font-size:13.5px;
   font-weight:700;
   padding:11px 18px;
   border-radius:9px;
-  box-shadow:0 2px 8px rgba(27,79,155,.35);
+  box-shadow:0 2px 8px rgba(220,38,38,.35);
 }
-.iframe-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border);}
-iframe{width:100%;height:1900px;border:none;display:block;}
+.iframe-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border);height:1194px;}
+iframe{width:100%;height:1374px;border:none;display:block;margin-top:-180px;}
 .linkbtn{display:block;text-align:center;background:none;border:none;color:var(--brand);font-size:14px;font-weight:600;padding:14px 0 4px;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:underline;width:100%;}
+.status-cta{
+  margin-top:18px;
+  background:linear-gradient(135deg,#F0FDF4 0%,#E7F8EC 100%);
+  border:1.5px solid #BBF7D0;
+  border-radius:12px;
+  padding:18px;
+  text-align:center;
+}
+.status-cta .ico{font-size:28px;display:block;margin-bottom:6px;}
+.status-cta .titulo{font-size:15px;font-weight:800;color:#15803D;margin-bottom:4px;}
+.status-cta .texto{font-size:13px;color:#166534;line-height:1.5;margin-bottom:14px;}
+.status-cta button{
+  background:var(--success);
+  color:white;
+  border:none;
+  padding:13px 22px;
+  border-radius:9px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+  box-shadow:0 2px 8px rgba(22,163,74,.3);
+}
 .field{margin-bottom:16px;}
 label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);}
 input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:'Inter',sans-serif;color:var(--text);}
@@ -103,19 +126,24 @@ input:focus{outline:none;border-color:var(--brand);}
   </div>
 
   <div class="card" id="viewForm">
-    <h1>Cadastro de acesso ao sistema</h1>
-    <p class="hint">Preencha o formulario abaixo com seus dados. Assim que a Secretaria liberar seu acesso (em ate 24 horas), voce recebera um e-mail com usuario, senha e o link do sistema.</p>
+    <h1>Cadastro de acesso ao sistema Devlith Educa</h1>
+    <p class="hint">Preencha o formulario abaixo com seus dados. Em ate 24 horas a equipe do sistema Devlith vai liberar seu acesso, e voce recebera a resposta por e-mail.</p>
     <div class="alerta">
-      <div class="alerta-badge">IMPORTANTE</div>
+      <div class="alerta-badge">ATENCAO</div>
       <p class="alerta-titulo">Voce ja tem seu e-mail institucional?</p>
-      <p class="alerta-texto">Ele sera o seu <strong>usuario de acesso</strong> ao sistema, entao precisa estar em maos antes de preencher o formulario abaixo. O dominio e <strong>@seduc.araruama.rj.gov.br</strong>.</p>
+      <p class="alerta-texto">Ele sera o seu <strong>usuario de acesso</strong> ao sistema. <strong>Sem o e-mail institucional, voce nao conseguira acessar o sistema da Devlith</strong> - por isso ele precisa estar em maos antes de preencher o formulario abaixo. O dominio e <strong>@seduc.araruama.rj.gov.br</strong>.</p>
       <p class="alerta-texto" style="margin-bottom:12px;">Ainda nao tem? Crie primeiro no site do setor de Informatica da SEDUC:</p>
       <a class="alerta-cta" href="https://ditei.educacaoararuama.rj.gov.br/cadastro/public/" target="_blank">Criar meu e-mail institucional &#8594;</a>
     </div>
     <div class="iframe-wrap">
       <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSc2mIZCyDXk2CuJK6wLo6MTLneOGNs1IUMudM2vS4DIpif5wg/viewform?embedded=true" title="Formulario de cadastro" scrolling="yes">Carregando...</iframe>
     </div>
-    <button class="linkbtn" onclick="mostrarVerificar()">Ja enviei meu cadastro - verificar status</button>
+    <div class="status-cta">
+      <span class="ico">&#9989;</span>
+      <p class="titulo">Ja enviou seus dados?</p>
+      <p class="texto">Assim que a Secretaria liberar seu acesso, voce pode conferir aqui mesmo - sem precisar esperar so pelo e-mail.</p>
+      <button onclick="mostrarVerificar()">Verificar meu status agora</button>
+    </div>
   </div>
 
   <div class="card" id="viewVerif" style="display:none;">
