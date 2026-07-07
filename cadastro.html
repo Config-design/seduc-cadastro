@@ -48,8 +48,35 @@ body{
   position:absolute;top:0;left:0;right:0;height:4px;
   background:linear-gradient(90deg,var(--brand),#3B6FC4,#6EA0E8);
 }
-h1{font-size:19px;margin-bottom:6px;color:var(--text);}
+h1{font-size:19px;color:var(--text);font-weight:800;}
+h1 .marca{color:var(--brand);}
 .hint{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:18px;}
+.titulo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.titulo-ico{
+  flex-shrink:0;
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,#EEF4FF,#DCE9FD);
+  display:flex;align-items:center;justify-content:center;
+  font-size:19px;
+}
+.passos{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+  background:#F8FAFF;
+  border:1px solid #E5EEFC;
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:18px;
+}
+.passo{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#2C4A78;}
+.passo-ico{font-size:14px;}
+.passo-seta{color:#B9CDF7;font-size:14px;font-weight:700;}
+@media(max-width:400px){
+  .passos{flex-direction:column;align-items:flex-start;gap:8px;}
+  .passo-seta{display:none;}
+}
 .alerta{
   position:relative;
   overflow:hidden;
@@ -114,29 +141,22 @@ h1{font-size:19px;margin-bottom:6px;color:var(--text);}
 .iframe-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border);height:1194px;}
 iframe{width:100%;height:1354px;border:none;display:block;margin-top:-160px;}
 .linkbtn{display:block;text-align:center;background:none;border:none;color:var(--brand);font-size:14px;font-weight:600;padding:14px 0 4px;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:underline;width:100%;}
-.status-cta{
-  margin-top:18px;
-  background:linear-gradient(135deg,#F0FDF4 0%,#E7F8EC 100%);
+.verif-topo{
+  display:block;
+  width:100%;
+  background:#F0FDF4;
+  color:#15803D;
   border:1.5px solid #BBF7D0;
-  border-radius:12px;
-  padding:18px;
-  text-align:center;
-}
-.status-cta .ico{font-size:28px;display:block;margin-bottom:6px;}
-.status-cta .titulo{font-size:15px;font-weight:800;color:#15803D;margin-bottom:4px;}
-.status-cta .texto{font-size:13px;color:#166534;line-height:1.5;margin-bottom:14px;}
-.status-cta button{
-  background:var(--success);
-  color:white;
-  border:none;
-  padding:13px 22px;
-  border-radius:9px;
-  font-size:14px;
+  border-radius:10px;
+  padding:12px 14px;
+  font-size:13px;
   font-weight:700;
-  cursor:pointer;
   font-family:'Inter',sans-serif;
-  box-shadow:0 2px 8px rgba(22,163,74,.3);
+  cursor:pointer;
+  margin-bottom:18px;
+  transition:background .15s;
 }
+.verif-topo:hover{background:#E7F8EC;}
 .field{margin-bottom:16px;}
 label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);}
 input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:'Inter',sans-serif;color:var(--text);}
@@ -160,8 +180,18 @@ input:focus{outline:none;border-color:var(--brand);}
   </div>
 
   <div class="card" id="viewForm">
-    <h1>Cadastro de acesso ao sistema Devlith Educa</h1>
-    <p class="hint">Preencha o formulario abaixo com seus dados. Em ate 24 horas a equipe do sistema Devlith vai liberar seu acesso, e voce recebera a resposta por e-mail.</p>
+    <div class="titulo-row">
+      <span class="titulo-ico">&#128221;</span>
+      <h1>Cadastro de acesso ao sistema <span class="marca">Devlith Educa</span></h1>
+    </div>
+    <div class="passos">
+      <div class="passo"><span class="passo-ico">1&#65039;&#8419;</span><span>Preencha seus dados</span></div>
+      <div class="passo-seta">&#8594;</div>
+      <div class="passo"><span class="passo-ico">2&#65039;&#8419;</span><span>Aguarde ate 24h</span></div>
+      <div class="passo-seta">&#8594;</div>
+      <div class="passo"><span class="passo-ico">3&#65039;&#8419;</span><span>Receba por e-mail</span></div>
+    </div>
+    <button class="verif-topo" onclick="mostrarVerificar()">&#9989; Ja enviei meus dados - verificar se foi liberado</button>
     <div class="alerta">
       <div class="alerta-badge">ATENCAO</div>
       <p class="alerta-titulo">Voce ja tem seu e-mail institucional?</p>
@@ -171,12 +201,6 @@ input:focus{outline:none;border-color:var(--brand);}
     </div>
     <div class="iframe-wrap">
       <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSc2mIZCyDXk2CuJK6wLo6MTLneOGNs1IUMudM2vS4DIpif5wg/viewform?embedded=true" title="Formulario de cadastro" scrolling="yes">Carregando...</iframe>
-    </div>
-    <div class="status-cta">
-      <span class="ico">&#9989;</span>
-      <p class="titulo">Ja enviou seus dados?</p>
-      <p class="texto">Assim que a Secretaria liberar seu acesso, voce pode conferir aqui mesmo - sem precisar esperar so pelo e-mail.</p>
-      <button onclick="mostrarVerificar()">Verificar meu status agora</button>
     </div>
   </div>
 
