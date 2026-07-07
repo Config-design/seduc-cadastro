@@ -200,31 +200,31 @@ input:focus{outline:none;border-color:var(--brand);}
     <div class="passos">
       <div class="passo"><span class="passo-ico">1&#65039;&#8419;</span><span>Preencha seus dados</span></div>
       <div class="passo-seta">&#8594;</div>
-      <div class="passo"><span class="passo-ico">2&#65039;&#8419;</span><span>Aguarde ate 24h</span></div>
+      <div class="passo"><span class="passo-ico">2&#65039;&#8419;</span><span>Aguarde até 24h</span></div>
       <div class="passo-seta">&#8594;</div>
       <div class="passo"><span class="passo-ico">3&#65039;&#8419;</span><span>Receba por e-mail</span></div>
     </div>
-    <button class="verif-topo" onclick="mostrarVerificar()">&#9989; Ja enviei meus dados - verificar se foi liberado</button>
+    <button class="verif-topo" onclick="mostrarVerificar()">&#9989; Já enviei meus dados - verificar se foi liberado</button>
     <div class="alerta">
-      <div class="alerta-badge">ATENCAO</div>
-      <p class="alerta-titulo">Voce ja tem seu e-mail institucional?</p>
-      <p class="alerta-texto">Ele sera o seu <strong>usuario de acesso</strong> ao sistema. <strong>Sem o e-mail institucional, voce nao conseguira acessar o sistema da Devlith</strong> - por isso ele precisa estar em maos antes de preencher o formulario abaixo. O dominio e <strong>@seduc.araruama.rj.gov.br</strong>.</p>
-      <p class="alerta-texto" style="margin-bottom:12px;">Ainda nao tem? Crie primeiro no site do setor de Informatica da SEDUC:</p>
+      <div class="alerta-badge">ATENÇÃO</div>
+      <p class="alerta-titulo">Você já tem seu e-mail institucional?</p>
+      <p class="alerta-texto">Ele será o seu <strong>usuário de acesso</strong> ao sistema. <strong>Sem o e-mail institucional, você não conseguirá acessar o sistema da Devlith</strong> - por isso ele precisa estar em mãos antes de preencher o formulário abaixo. O domínio é <strong>@seduc.araruama.rj.gov.br</strong>.</p>
+      <p class="alerta-texto" style="margin-bottom:12px;">Ainda não tem? Crie primeiro no site do setor de Informática da SEDUC:</p>
       <a class="alerta-cta" href="https://ditei.educacaoararuama.rj.gov.br/cadastro/public/" target="_blank">Criar meu e-mail institucional &#8594;</a>
     </div>
     <div class="iframe-wrap">
-      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSc2mIZCyDXk2CuJK6wLo6MTLneOGNs1IUMudM2vS4DIpif5wg/viewform?embedded=true" title="Formulario de cadastro" scrolling="yes">Carregando...</iframe>
+      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSc2mIZCyDXk2CuJK6wLo6MTLneOGNs1IUMudM2vS4DIpif5wg/viewform?embedded=true" title="Formulário de cadastro" scrolling="yes">Carregando...</iframe>
     </div>
   </div>
 
   <div class="card" id="viewVerif" style="display:none;">
     <button class="back" onclick="mostrarForm()">&#8592; Voltar ao cadastro</button>
     <h1>Verificar meu cadastro</h1>
-    <p class="hint">Digite seu CPF para consultar se o seu acesso ja foi liberado.</p>
+    <p class="hint">Digite seu CPF para consultar se o seu acesso já foi liberado.</p>
     <div class="field">
       <label>CPF</label>
       <input type="text" id="cpf_v" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" oninput="mCPF2(this)"/>
-      <div class="err" id="err_cpf">Digite um CPF valido.</div>
+      <div class="err" id="err_cpf">Digite um CPF válido.</div>
     </div>
     <button class="btn btn-p" onclick="verificar()">Consultar</button>
     <div id="res_verif" style="margin-top:16px;"></div>
@@ -351,7 +351,7 @@ function verificar(){
       });
 
       if(!found){
-        el.innerHTML='<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:16px;font-size:13px;color:#DC2626;text-align:center;"><strong>CPF nao encontrado.</strong><br/>Seu cadastro pode ainda nao ter sido processado. Se enviou ha poucos minutos, aguarde e tente novamente.</div>';
+        el.innerHTML='<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:16px;font-size:13px;color:#DC2626;text-align:center;"><strong>CPF não encontrado.</strong><br/>Seu cadastro pode ainda não ter sido processado. Se enviou há poucos minutos, aguarde e tente novamente.</div>';
         return;
       }
 
@@ -364,9 +364,9 @@ function verificar(){
         el.innerHTML =
           '<div style="background:#F0FDF4;border:2px solid #16A34A;border-radius:12px;padding:20px;text-align:center;">'+
             '<span style="font-size:40px;display:block;margin-bottom:10px;">&#127881;</span>'+
-            '<strong style="font-size:17px;color:#15803D;display:block;margin-bottom:10px;">Ola, '+primeiroNome+'! Seu acesso ja esta liberado.</strong>'+
+            '<strong style="font-size:17px;color:#15803D;display:block;margin-bottom:10px;">Olá, '+primeiroNome+'! Seu acesso já está liberado.</strong>'+
             '<div style="background:white;border:1px solid #BBF7D0;border-radius:10px;padding:14px 16px;margin:14px 0;text-align:left;">'+
-              '<p style="font-size:11px;text-transform:uppercase;color:#64748B;margin-bottom:2px;">Usuario</p>'+
+              '<p style="font-size:11px;text-transform:uppercase;color:#64748B;margin-bottom:2px;">Usuário</p>'+
               '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'+
                 '<p style="font-size:14px;font-weight:700;color:#1E293B;flex:1;word-break:break-all;margin:0;">'+emailInst+'</p>'+
                 '<button type="button" class="btn-copy" data-copy="'+emailInst+'" onclick="copiarCred(this)">Copiar</button>'+
@@ -380,13 +380,13 @@ function verificar(){
             '<a href="'+LINK_SISTEMA+'" target="_blank" style="display:inline-block;background:#16A34A;color:white;text-decoration:none;font-size:15px;font-weight:700;padding:13px 28px;border-radius:10px;">Acessar o sistema</a>'+
           '</div>';
       } else if(status === 'nao liberado' || status === 'não liberado'){
-        el.innerHTML='<div style="background:#FEF2F2;border:2px solid #FECACA;border-radius:12px;padding:18px;text-align:center;"><span style="font-size:40px;display:block;margin-bottom:10px;">&#9888;</span><strong style="font-size:17px;color:#DC2626;display:block;margin-bottom:8px;">Cadastro nao aprovado</strong><p style="font-size:14px;color:#991B1B;line-height:1.7;">Entre em contato com a Secretaria de Educacao para mais informacoes.</p></div>';
+        el.innerHTML='<div style="background:#FEF2F2;border:2px solid #FECACA;border-radius:12px;padding:18px;text-align:center;"><span style="font-size:40px;display:block;margin-bottom:10px;">&#9888;</span><strong style="font-size:17px;color:#DC2626;display:block;margin-bottom:8px;">Cadastro não aprovado</strong><p style="font-size:14px;color:#991B1B;line-height:1.7;">Entre em contato com a Secretaria de Educação para mais informações.</p></div>';
       } else {
-        el.innerHTML='<div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;padding:18px;text-align:center;"><span style="font-size:40px;display:block;margin-bottom:10px;">&#128337;</span><strong style="font-size:17px;color:#92400E;display:block;margin-bottom:8px;">Cadastro em andamento</strong><p style="font-size:14px;color:#92400E;line-height:1.7;">Seus dados foram recebidos.<br/>Aguarde em ate 24 horas.</p></div>';
+        el.innerHTML='<div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;padding:18px;text-align:center;"><span style="font-size:40px;display:block;margin-bottom:10px;">&#128337;</span><strong style="font-size:17px;color:#92400E;display:block;margin-bottom:8px;">Cadastro em andamento</strong><p style="font-size:14px;color:#92400E;line-height:1.7;">Seus dados foram recebidos.<br/>Aguarde em até 24 horas.</p></div>';
       }
     })
     .catch(function(){
-      el.innerHTML='<div style="color:#EF4444;font-size:13px;">Erro de conexao. Tente novamente.</div>';
+      el.innerHTML='<div style="color:#EF4444;font-size:13px;">Erro de conexão. Tente novamente.</div>';
     });
 }
 </script>
