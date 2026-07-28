@@ -108,15 +108,31 @@ var colIdx={};
 function normHeaderD(s){
   return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 }
-function findColD(headers, alvo){
+// Retorna TODOS os indices de colunas cujo cabecalho contenha "alvo" (cobre colunas duplicadas)
+function findColsD(headers, alvo){
+  var idx=[];
   for(var i=0;i<headers.length;i++){
-    if(normHeaderD(headers[i]).indexOf(alvo)>=0) return i;
+    if(normHeaderD(headers[i]).indexOf(alvo)>=0) idx.push(i);
   }
-  return -1;
+  return idx;
 }
+// Retorna indices de colunas cujo cabecalho seja EXATAMENTE igual a "alvoNorm" (evita falso-positivo, ex: "Escola" vs "...escola ou na sede...")
+function findColsExatoD(headers, alvoNorm){
+  var idx=[];
+  for(var i=0;i<headers.length;i++){
+    if(normHeaderD(headers[i])===alvoNorm) idx.push(i);
+  }
+  return idx;
+}
+// Percorre todas as colunas mapeadas pra essa chave e devolve a primeira que tiver valor preenchido nessa linha
 function pick(r, key){
-  var i = colIdx[key];
-  return (i!==undefined && i>=0) ? (r[i]||'') : '';
+  var arr = colIdx[key];
+  if(!arr || !arr.length) return '';
+  for(var i=0;i<arr.length;i++){
+    var v = r[arr[i]];
+    if(v!==undefined && String(v).trim()!=='') return v;
+  }
+  return '';
 }
 
 function doCopy(){
@@ -168,15 +184,16 @@ function reload(){
       var rows=parseCSV(text);
       var headers = rows.shift() || [];
       colIdx = {
-        data: findColD(headers,'carimbo'),
-        nome: findColD(headers,'nome'),
-        escola: findColD(headers,'escola'),
-        cargo: findColD(headers,'cargo'),
-        emailInst: findColD(headers,'institucional'),
-        emailPessoal: findColD(headers,'pessoal'),
-        cpf: findColD(headers,'cpf'),
-        cep: findColD(headers,'cep'),
-        status: findColD(headers,'status')
+        data: findColsD(headers,'carimbo'),
+        nome: findColsD(headers,'nome'),
+        escola: findColsExatoD(headers,'escola'), // exato, pra nao pegar "...escola ou na sede..."
+        cargo: findColsD(headers,'cargo'),
+        emailInst: findColsD(headers,'institucional'),
+        emailPessoal: findColsD(headers,'pessoal'),
+        cpf: findColsD(headers,'cpf'),
+        cep: findColsD(headers,'cep'),
+        status: findColsD(headers,'status'),
+        trabalha: findColsD(headers,'sede da seduc') // pega qualquer coluna duplicada dessa pergunta
       };
       linhas=rows;
       render(rows);
@@ -192,6 +209,7 @@ function render(rows){
   var total=rows.length,lib=0,pend=0,nao=0;
   var html=rows.map(function(r){
     var nome=pick(r,'nome'),escola=pick(r,'escola'),cargo=pick(r,'cargo'),emailInst=pick(r,'emailInst'),emailPessoal=pick(r,'emailPessoal'),cpf=pick(r,'cpf'),cep=pick(r,'cep'),status=pick(r,'status'),data=pick(r,'data');
+    if(!escola){ var trab=pick(r,'trabalha'); if(trab && normHeaderD(trab).indexOf('sede')>=0) escola='Sede da SEDUC'; }
     var si=statusInfo(status);
     if(si.k==='lib')lib++;else if(si.k==='nao')nao++;else pend++;
     return '<tr><td>'+esc(nome)+'</td><td>'+esc(escola)+'</td><td>'+esc(cargo)+'</td><td>'+esc(emailInst)+'</td><td>'+esc(emailPessoal)+'</td><td>'+esc(cpf)+'</td><td>'+esc(cep)+'</td><td>'+si.tag+'</td><td>'+esc(fmtData(data))+'</td></tr>';
@@ -208,7 +226,11 @@ function render(rows){
 function doExp(){
   if(!linhas.length){alert('Nenhum dado para exportar.');return;}
   var headers=['Data/Hora','Nome','Escola','Cargo','E-mail institucional','E-mail pessoal','CPF','CEP','Status'];
-  var rows=linhas.map(function(r){return [pick(r,'data'),pick(r,'nome'),pick(r,'escola'),pick(r,'cargo'),pick(r,'emailInst'),pick(r,'emailPessoal'),pick(r,'cpf'),pick(r,'cep'),pick(r,'status')];});
+  var rows=linhas.map(function(r){
+    var escola=pick(r,'escola');
+    if(!escola){ var trab=pick(r,'trabalha'); if(trab && normHeaderD(trab).indexOf('sede')>=0) escola='Sede da SEDUC'; }
+    return [pick(r,'data'),pick(r,'nome'),escola,pick(r,'cargo'),pick(r,'emailInst'),pick(r,'emailPessoal'),pick(r,'cpf'),pick(r,'cep'),pick(r,'status')];
+  });
   var csv=[headers].concat(rows).map(function(row){return row.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}).join(';');}).join('\r\n');
   var blob=new Blob([new Uint8Array([0xEF,0xBB,0xBF]),csv],{type:'text/csv;charset=utf-8;'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='devlith_cadastros_'+new Date().toISOString().slice(0,10)+'.csv';
