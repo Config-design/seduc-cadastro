@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard - Devlith Educa (Cabo Frio)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--brand:#1B4F9B;--surface:#F1F5F9;--border:#E2E8F0;--text:#1E293B;--muted:#64748B;--success:#16A34A;--warn:#D97706;--danger:#DC2626;}
+body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;}
+.topbar{background:white;border-bottom:1px solid var(--border);padding:0 14px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 6px rgba(0,0,0,.07);}
+.tl{display:flex;align-items:center;gap:10px;}
+.ltxt{font-size:14px;font-weight:800;color:var(--brand);}
+.lsubt{font-size:10px;color:var(--muted);}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.llbl{font-size:11px;color:var(--success);font-weight:600;}
+.wrap{max-width:900px;margin:0 auto;padding:14px 12px 40px;}
+.kgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+.kpi{background:white;border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.ki{font-size:22px;flex-shrink:0;}
+.kv{font-size:24px;font-weight:800;line-height:1;}
+.kl{font-size:11px;color:var(--muted);margin-top:3px;}
+.lpanel{background:white;border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.lbox{background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:12px 14px;font-size:12px;color:var(--brand);word-break:break-all;font-weight:500;margin-bottom:10px;}
+.lrow{display:flex;gap:8px;}
+.bcopy{flex:1;background:var(--brand);color:white;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s;}
+.bcopy.ok{background:var(--success);}
+.bref{background:#EFF6FF;color:var(--brand);border:2px solid #BFDBFE;border-radius:10px;padding:13px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;}
+.bref.load{background:#D97706;color:white;border-color:#D97706;}
+.cfb{font-size:12px;font-weight:600;margin-top:8px;min-height:16px;color:var(--success);}
+.panel{background:white;border:1px solid var(--border);border-radius:10px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.04);overflow:hidden;}
+.ph{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#FAFBFF;flex-wrap:wrap;gap:8px;}
+.pt{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;color:white;background:var(--success);}
+.acts{display:flex;gap:6px;}
+.bexp{background:var(--success);color:white;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);background:#F8FAFF;border-bottom:1px solid var(--border);white-space:nowrap;}
+tr{border-bottom:1px solid #F1F5F9;}
+td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;}
+.tag-ok{background:#F0FDF4;color:#16A34A;}
+.tag-wait{background:#FFFBEB;color:#D97706;}
+.tag-no{background:#FEF2F2;color:#DC2626;}
+.empty{padding:30px 16px;text-align:center;color:var(--muted);font-size:13px;}
+.spin{width:18px;height:18px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;margin-right:8px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.info{font-size:12px;color:var(--muted);margin-top:8px;}
+@media(min-width:600px){.kgrid{grid-template-columns:repeat(4,1fr);}.wrap{padding:20px 20px 40px;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tl">
+    <div><div class="ltxt">Devlith Educa</div><div class="lsubt">Dashboard Cabo Frio (leitura)</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;"><div class="ldot"></div><div class="llbl">Ao vivo</div></div>
+</div>
+
+<div class="wrap">
+  <div class="kgrid">
+    <div class="kpi"><div class="ki">&#128202;</div><div><div class="kv" id="kT">-</div><div class="kl">Total de cadastros</div></div></div>
+    <div class="kpi"><div class="ki">&#9989;</div><div><div class="kv" id="kL">-</div><div class="kl">Liberados</div></div></div>
+    <div class="kpi"><div class="ki">&#9203;</div><div><div class="kv" id="kP">-</div><div class="kl">Pendentes</div></div></div>
+    <div class="kpi"><div class="ki">&#128683;</div><div><div class="kv" id="kN">-</div><div class="kl">Nao liberados</div></div></div>
+  </div>
+
+  <div class="lpanel">
+    <div style="font-size:14px;font-weight:700;margin-bottom:4px;">&#128279; Link para enviar via WhatsApp</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Copie e envie para as pessoas. Os dados aparecem aqui automaticamente.</div>
+    <div class="lbox" id="lboxLink">https://config-design.github.io/seduc-cadastro/cadastro-cabofrio.html</div>
+    <div class="lrow">
+      <button class="bcopy" id="btnCopy" onclick="doCopy()">&#128203; Copiar link</button>
+      <button class="bref" id="btnRef" onclick="reload()">&#8635; Atualizar</button>
+    </div>
+    <div class="cfb" id="cfb"></div>
+  </div>
+
+  <div class="panel">
+    <div class="ph">
+      <div class="pt">&#128203; Cadastros <span class="badge" id="bC">0</span></div>
+      <div class="acts">
+        <button class="bexp" onclick="doExp()">&#11015; Excel</button>
+      </div>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Nome</th><th>Escola</th><th>Cargo</th><th>E-mail institucional</th><th>E-mail pessoal</th><th>CPF</th><th>CEP</th><th>Status</th><th>Data/Hora</th></tr></thead>
+        <tbody id="bCad"><tr><td colspan="9"><div class="empty"><span class="spin"></span>Carregando...</div></td></tr></tbody>
+      </table>
+    </div>
+    <div class="info" style="padding:0 14px 14px;">Para liberar acesso, marque "Liberado" na coluna Status direto na planilha de respostas. O e-mail com usuario e senha e enviado automaticamente.</div>
+  </div>
+</div>
+
+<script>
+// TODO: troque pelo link "Publicar na web" (CSV) da planilha de respostas de Cabo Frio
+var CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vQjuWvFBOUciZYmL3PwvFx3lBTYf8SpFF5bRNkNGzPTw-FXakGhb5DpAQRItuj55gHUq1s2hgkHOeCi/pub?gid=986928856&single=true&output=csv';
+var LINK='https://config-design.github.io/seduc-cadastro/cadastro-cabofrio.html';
+var linhas=[];
+var colIdx={};
+
+function normHeaderD(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+// Retorna TODOS os indices de colunas cujo cabecalho contenha "alvo" (cobre colunas duplicadas)
+function findColsD(headers, alvo){
+  var idx=[];
+  for(var i=0;i<headers.length;i++){
+    if(normHeaderD(headers[i]).indexOf(alvo)>=0) idx.push(i);
+  }
+  return idx;
+}
+// Retorna indices de colunas cujo cabecalho seja EXATAMENTE igual a "alvoNorm" (evita falso-positivo, ex: "Escola" vs "...escola ou na sede...")
+function findColsExatoD(headers, alvoNorm){
+  var idx=[];
+  for(var i=0;i<headers.length;i++){
+    if(normHeaderD(headers[i])===alvoNorm) idx.push(i);
+  }
+  return idx;
+}
+// Percorre todas as colunas mapeadas pra essa chave e devolve a primeira que tiver valor preenchido nessa linha
+function pick(r, key){
+  var arr = colIdx[key];
+  if(!arr || !arr.length) return '';
+  for(var i=0;i<arr.length;i++){
+    var v = r[arr[i]];
+    if(v!==undefined && String(v).trim()!=='') return v;
+  }
+  return '';
+}
+
+function doCopy(){
+  var btn=document.getElementById('btnCopy');
+  function ok(){btn.textContent='Copiado!';btn.classList.add('ok');showFb('Link copiado!');setTimeout(function(){btn.textContent='Copiar link';btn.classList.remove('ok');showFb('');},3000);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(LINK).then(ok).catch(function(){fb(LINK,ok);});}else{fb(LINK,ok);}
+}
+function fb(v,cb){var t=document.createElement('textarea');t.value=v;t.style.cssText='position:fixed;opacity:0;';document.body.appendChild(t);t.select();try{document.execCommand('copy');cb();}catch(e){}document.body.removeChild(t);}
+function showFb(m){document.getElementById('cfb').textContent=m;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function parseCSV(text){
+  var rows=[],row=[],field='',inQuotes=false;
+  for(var i=0;i<text.length;i++){
+    var c=text[i],n=text[i+1];
+    if(inQuotes){
+      if(c==='"'&&n==='"'){field+='"';i++;}
+      else if(c==='"'){inQuotes=false;}
+      else{field+=c;}
+    } else {
+      if(c==='"'){inQuotes=true;}
+      else if(c===','){row.push(field);field='';}
+      else if(c==='\r'){}
+      else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';}
+      else{field+=c;}
+    }
+  }
+  if(field.length||row.length){row.push(field);rows.push(row);}
+  return rows.filter(function(r){return r.length>1||r[0]!=='';});
+}
+
+function statusInfo(v){
+  v=(v||'').toString().trim().toLowerCase();
+  if(v==='liberado')return {tag:'<span class="tag tag-ok">Liberado</span>',k:'lib'};
+  if(v==='nao liberado'||v==='não liberado')return {tag:'<span class="tag tag-no">Nao liberado</span>',k:'nao'};
+  return {tag:'<span class="tag tag-wait">Pendente</span>',k:'pend'};
+}
+
+function fmtData(v){
+  return v&&v!=='' ? v : '-';
+}
+
+function reload(){
+  var btn=document.getElementById('btnRef');
+  btn.textContent='Carregando...';btn.classList.add('load');
+  fetch(CSV_URL+'&_ts='+Date.now())
+    .then(function(r){return r.text();})
+    .then(function(text){
+      var rows=parseCSV(text);
+      var headers = rows.shift() || [];
+      colIdx = {
+        data: findColsD(headers,'carimbo'),
+        nome: findColsD(headers,'nome'),
+        escola: findColsExatoD(headers,'escola'), // exato, pra nao pegar "...escola ou na sede..."
+        cargo: findColsD(headers,'cargo'),
+        emailInst: findColsD(headers,'institucional'),
+        emailPessoal: findColsD(headers,'pessoal'),
+        cpf: findColsD(headers,'cpf'),
+        cep: findColsD(headers,'cep'),
+        status: findColsD(headers,'status'),
+        trabalha: findColsD(headers,'sede da seduc') // pega qualquer coluna duplicada dessa pergunta
+      };
+      linhas=rows;
+      render(rows);
+      btn.textContent='Atualizar';btn.classList.remove('load');
+    })
+    .catch(function(){
+      btn.textContent='Erro. Tentar de novo';btn.classList.remove('load');
+      document.getElementById('bCad').innerHTML='<tr><td colspan="9"><div class="empty">Nao foi possivel carregar a planilha. Confira se a publicacao na web ainda esta ativa.</div></td></tr>';
+    });
+}
+
+function render(rows){
+  var total=rows.length,lib=0,pend=0,nao=0;
+  var html=rows.map(function(r){
+    var nome=pick(r,'nome'),escola=pick(r,'escola'),cargo=pick(r,'cargo'),emailInst=pick(r,'emailInst'),emailPessoal=pick(r,'emailPessoal'),cpf=pick(r,'cpf'),cep=pick(r,'cep'),status=pick(r,'status'),data=pick(r,'data');
+    if(!escola){ var trab=pick(r,'trabalha'); if(trab && normHeaderD(trab).indexOf('sede')>=0) escola='Sede da SEDUC'; }
+    var si=statusInfo(status);
+    if(si.k==='lib')lib++;else if(si.k==='nao')nao++;else pend++;
+    return '<tr><td>'+esc(nome)+'</td><td>'+esc(escola)+'</td><td>'+esc(cargo)+'</td><td>'+esc(emailInst)+'</td><td>'+esc(emailPessoal)+'</td><td>'+esc(cpf)+'</td><td>'+esc(cep)+'</td><td>'+si.tag+'</td><td>'+esc(fmtData(data))+'</td></tr>';
+  }).join('');
+
+  document.getElementById('kT').textContent=total;
+  document.getElementById('kL').textContent=lib;
+  document.getElementById('kP').textContent=pend;
+  document.getElementById('kN').textContent=nao;
+  document.getElementById('bC').textContent=total;
+  document.getElementById('bCad').innerHTML=total?html:'<tr><td colspan="9"><div class="empty">Nenhum cadastro ainda.</div></td></tr>';
+}
+
+function doExp(){
+  if(!linhas.length){alert('Nenhum dado para exportar.');return;}
+  var headers=['Data/Hora','Nome','Escola','Cargo','E-mail institucional','E-mail pessoal','CPF','CEP','Status'];
+  var rows=linhas.map(function(r){
+    var escola=pick(r,'escola');
+    if(!escola){ var trab=pick(r,'trabalha'); if(trab && normHeaderD(trab).indexOf('sede')>=0) escola='Sede da SEDUC'; }
+    return [pick(r,'data'),pick(r,'nome'),escola,pick(r,'cargo'),pick(r,'emailInst'),pick(r,'emailPessoal'),pick(r,'cpf'),pick(r,'cep'),pick(r,'status')];
+  });
+  var csv=[headers].concat(rows).map(function(row){return row.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}).join(';');}).join('\r\n');
+  var blob=new Blob([new Uint8Array([0xEF,0xBB,0xBF]),csv],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='devlith_cadastros_cabofrio_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',function(){reload();setInterval(reload,30000);});
+}else{
+  reload();setInterval(reload,30000);
+}
+</script>
+</body>
+</html>
