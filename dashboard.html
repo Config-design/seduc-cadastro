@@ -167,7 +167,7 @@ function parseCSV(text){
 function statusInfo(v){
   v=(v||'').toString().trim().toLowerCase();
   if(v==='liberado')return {tag:'<span class="tag tag-ok">Liberado</span>',k:'lib'};
-  if(v==='nao liberado'||v==='não liberado')return {tag:'<span class="tag tag-no">Nao liberado</span>',k:'nao'};
+  if(v.replace(/ã/g,'a').indexOf('nao liberado')===0){var mt=v.indexOf('mail')>=0?' - E-mail':(v.indexOf('dado')>=0?' - Dados':'');return {tag:'<span class="tag tag-no">Nao liberado'+mt+'</span>',k:'nao'};}
   return {tag:'<span class="tag tag-wait">Pendente</span>',k:'pend'};
 }
 
