@@ -38,6 +38,11 @@ body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--text);
 .pt{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;}
 .badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;color:white;background:var(--success);}
 .acts{display:flex;gap:6px;}
+.flt{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:white;}
+.flt label{display:block;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
+.flt select,.flt input{font-family:'Inter',sans-serif;font-size:13px;padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:white;color:var(--text);min-width:130px;}
+.flt .bclr{background:#F1F5F9;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--muted);}
+.flt .fcount{font-size:12px;color:var(--muted);margin-left:auto;align-self:center;}
 .bexp{background:var(--success);color:white;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 table{width:100%;border-collapse:collapse;font-size:12px;}
@@ -88,6 +93,13 @@ td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
       <div class="acts">
         <button class="bexp" onclick="doExp()">&#11015; Excel</button>
       </div>
+    </div>
+    <div class="flt">
+      <div><label for="fMes">M&ecirc;s</label><select id="fMes" onchange="onMes()"><option value="">Todos os meses</option></select></div>
+      <div><label for="fDe">De</label><input type="date" id="fDe" onchange="onDatas()"/></div>
+      <div><label for="fAte">At&eacute;</label><input type="date" id="fAte" onchange="onDatas()"/></div>
+      <button class="bclr" onclick="limparFiltro()">Limpar filtro</button>
+      <div class="fcount" id="fCount"></div>
     </div>
     <div class="tw">
       <table>
@@ -187,7 +199,8 @@ function reload(){
         data: findColsD(headers,'carimbo'),
         nome: findColsD(headers,'nome'),
         escola: findColsExatoD(headers,'escola'), // exato, pra nao pegar "...escola ou na sede..."
-        cargo: findColsD(headers,'cargo'),
+        cargo: findColsExatoD(headers,'cargo'),
+        cargoPad: findColsExatoD(headers,'cargo padronizado'),
         emailInst: findColsD(headers,'institucional'),
         emailPessoal: findColsD(headers,'pessoal'),
         cpf: findColsD(headers,'cpf'),
@@ -196,6 +209,7 @@ function reload(){
         trabalha: findColsD(headers,'sede da seduc') // pega qualquer coluna duplicada dessa pergunta
       };
       linhas=rows;
+      popularMeses();
       render(rows);
       btn.textContent='Atualizar';btn.classList.remove('load');
     })
@@ -205,10 +219,55 @@ function reload(){
     });
 }
 
-function render(rows){
+
+// ===== Filtro por data =====
+// Converte o carimbo do Forms ("dd/mm/aaaa hh:mm:ss") em {y,m,d}. Assume dia/mes/ano (Brasil).
+function parseDataBR(v){
+  var m=String(v||'').match(/(\d{1,4})[\/\-](\d{1,2})[\/\-](\d{1,4})/);
+  if(!m)return null;
+  var a=+m[1],b=+m[2],c=+m[3],y,mo,d;
+  if(a>31){y=a;mo=b;d=c;}            // aaaa-mm-dd
+  else{y=c;d=a;mo=b; if(mo>12&&d<=12){var t=d;d=mo;mo=t;}} // dd/mm/aaaa (troca se vier mm/dd)
+  if(y<100)y+=2000;
+  return {y:y,m:mo,d:d};
+}
+function p2(n){return (n<10?'0':'')+n;}
+function chaveMes(dt){return dt.y+'-'+p2(dt.m);}
+function chaveDia(dt){return dt.y+'-'+p2(dt.m)+'-'+p2(dt.d);}
+var NOMES_MES=['','Janeiro','Fevereiro','Mar\u00e7o','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function popularMeses(){
+  var sel=document.getElementById('fMes'),atual=sel.value,cont={};
+  linhas.forEach(function(r){var dt=parseDataBR(pick(r,'data'));if(dt){var k=chaveMes(dt);cont[k]=(cont[k]||0)+1;}});
+  var ks=Object.keys(cont).sort().reverse();
+  sel.innerHTML='<option value="">Todos os meses</option>'+ks.map(function(k){
+    var pt=k.split('-');return '<option value="'+k+'">'+NOMES_MES[+pt[1]]+' de '+pt[0]+' ('+cont[k]+')</option>';
+  }).join('');
+  sel.value=atual;
+}
+function onMes(){document.getElementById('fDe').value='';document.getElementById('fAte').value='';render(linhas);}
+function onDatas(){document.getElementById('fMes').value='';render(linhas);}
+function limparFiltro(){document.getElementById('fMes').value='';document.getElementById('fDe').value='';document.getElementById('fAte').value='';render(linhas);}
+function filtrar(rows){
+  var mes=document.getElementById('fMes').value,de=document.getElementById('fDe').value,ate=document.getElementById('fAte').value;
+  if(!mes&&!de&&!ate)return rows;
+  return rows.filter(function(r){
+    var dt=parseDataBR(pick(r,'data'));
+    if(!dt)return false;
+    if(mes)return chaveMes(dt)===mes;
+    var d=chaveDia(dt);
+    if(de&&d<de)return false;
+    if(ate&&d>ate)return false;
+    return true;
+  });
+}
+
+function render(todas){
+  var rows=filtrar(todas);
+  document.getElementById('fCount').textContent=(rows.length===todas.length)?(todas.length+' cadastros'):(rows.length+' de '+todas.length+' cadastros');
   var total=rows.length,lib=0,pend=0,nao=0;
   var html=rows.map(function(r){
-    var nome=pick(r,'nome'),escola=pick(r,'escola'),cargo=pick(r,'cargo'),emailInst=pick(r,'emailInst'),emailPessoal=pick(r,'emailPessoal'),cpf=pick(r,'cpf'),cep=pick(r,'cep'),status=pick(r,'status'),data=pick(r,'data');
+    var nome=pick(r,'nome'),escola=pick(r,'escola'),cargo=pick(r,'cargoPad')||pick(r,'cargo'),emailInst=pick(r,'emailInst'),emailPessoal=pick(r,'emailPessoal'),cpf=pick(r,'cpf'),cep=pick(r,'cep'),status=pick(r,'status'),data=pick(r,'data');
     if(!escola){ var trab=pick(r,'trabalha'); if(trab && normHeaderD(trab).indexOf('sede')>=0) escola='Sede da SEDUC'; }
     var si=statusInfo(status);
     if(si.k==='lib')lib++;else if(si.k==='nao')nao++;else pend++;
@@ -224,12 +283,12 @@ function render(rows){
 }
 
 function doExp(){
-  if(!linhas.length){alert('Nenhum dado para exportar.');return;}
+  if(!filtrar(linhas).length){alert('Nenhum dado para exportar.');return;}
   var headers=['Data/Hora','Nome','Escola','Cargo','E-mail institucional','E-mail pessoal','CPF','CEP','Status'];
-  var rows=linhas.map(function(r){
+  var rows=filtrar(linhas).map(function(r){
     var escola=pick(r,'escola');
     if(!escola){ var trab=pick(r,'trabalha'); if(trab && normHeaderD(trab).indexOf('sede')>=0) escola='Sede da SEDUC'; }
-    return [pick(r,'data'),pick(r,'nome'),escola,pick(r,'cargo'),pick(r,'emailInst'),pick(r,'emailPessoal'),pick(r,'cpf'),pick(r,'cep'),pick(r,'status')];
+    return [pick(r,'data'),pick(r,'nome'),escola,(pick(r,'cargoPad')||pick(r,'cargo')),pick(r,'emailInst'),pick(r,'emailPessoal'),pick(r,'cpf'),pick(r,'cep'),pick(r,'status')];
   });
   var csv=[headers].concat(rows).map(function(row){return row.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}).join(';');}).join('\r\n');
   var blob=new Blob([new Uint8Array([0xEF,0xBB,0xBF]),csv],{type:'text/csv;charset=utf-8;'});
