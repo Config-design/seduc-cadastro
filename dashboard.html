@@ -42,6 +42,8 @@ body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--text);
 .flt label{display:block;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
 .flt select,.flt input{font-family:'Inter',sans-serif;font-size:13px;padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:white;color:var(--text);min-width:130px;}
 .flt .bclr{background:#F1F5F9;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--muted);}
+.flt .chk{display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text);padding:7px 0;cursor:pointer;}
+.flt .chk input{min-width:0;width:auto;}
 .flt .fcount{font-size:12px;color:var(--muted);margin-left:auto;align-self:center;}
 .bexp{background:var(--success);color:white;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
@@ -98,7 +100,9 @@ td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
       <div><label for="fMes">M&ecirc;s</label><select id="fMes" onchange="onMes()"><option value="">Todos os meses</option></select></div>
       <div><label for="fDe">De</label><input type="date" id="fDe" onchange="onDatas()"/></div>
       <div><label for="fAte">At&eacute;</label><input type="date" id="fAte" onchange="onDatas()"/></div>
+      <div><label for="fDup">Duplicados</label><label class="chk"><input type="checkbox" id="fDup" onchange="render(linhas)"/> <span id="fDupTxt">S&oacute; duplicados</span></label></div>
       <button class="bclr" onclick="limparFiltro()">Limpar filtro</button>
+      <button class="bclr" style="color:#B45309;border-color:#FCD34D;background:#FFFBEB;" onclick="doDup()">&#11015; Relat&oacute;rio de duplicados</button>
       <div class="fcount" id="fCount"></div>
     </div>
     <div class="tw">
@@ -210,6 +214,7 @@ function reload(){
       };
       linhas=rows;
       popularMeses();
+      calcularDuplicados();
       render(rows);
       btn.textContent='Atualizar';btn.classList.remove('load');
     })
@@ -247,11 +252,70 @@ function popularMeses(){
 }
 function onMes(){document.getElementById('fDe').value='';document.getElementById('fAte').value='';render(linhas);}
 function onDatas(){document.getElementById('fMes').value='';render(linhas);}
-function limparFiltro(){document.getElementById('fMes').value='';document.getElementById('fDe').value='';document.getElementById('fAte').value='';render(linhas);}
+function limparFiltro(){document.getElementById('fDup').checked=false;document.getElementById('fMes').value='';document.getElementById('fDe').value='';document.getElementById('fAte').value='';render(linhas);}
+// ===== Duplicados (mesmo CPF ou mesmo e-mail institucional) =====
+var dupGrupos=[]; // dupGrupos[g] = lista de linhas do grupo g
+function calcularDuplicados(){
+  var pai={};
+  function find(x){while(pai[x]!==x){pai[x]=pai[pai[x]];x=pai[x];}return x;}
+  function uni(a,b){a=find(a);b=find(b);if(a!==b)pai[b]=a;}
+  function chaves(r){
+    var k=[],cpf=String(pick(r,'cpf')||'').replace(/\D/g,''),em=String(pick(r,'emailInst')||'').trim().toLowerCase();
+    if(cpf.length===11)k.push('c:'+cpf);
+    if(em&&em.indexOf('@')>0)k.push('e:'+em);
+    return k;
+  }
+  linhas.forEach(function(r){
+    var k=chaves(r);r._k=k;
+    k.forEach(function(x){if(pai[x]===undefined)pai[x]=x;});
+    for(var i=1;i<k.length;i++)uni(k[0],k[i]);
+  });
+  var mapa={};dupGrupos=[];
+  linhas.forEach(function(r){
+    r._g=-1;
+    if(!r._k.length)return;
+    var raiz=find(r._k[0]);
+    if(mapa[raiz]===undefined){mapa[raiz]=dupGrupos.length;dupGrupos.push([]);}
+    r._g=mapa[raiz];dupGrupos[r._g].push(r);
+  });
+  var pessoas=0,envios=0;
+  dupGrupos.forEach(function(g){if(g.length>1){pessoas++;envios+=g.length;}});
+  document.getElementById('fDupTxt').textContent='S\u00f3 duplicados ('+pessoas+' pessoas)';
+}
+function tamGrupo(r){return r._g>=0?dupGrupos[r._g].length:1;}
+function statusFinalGrupo(g){
+  for(var i=0;i<g.length;i++){if(statusInfo(pick(g[i],'status')).k==='lib')return 'Liberado';}
+  var ult=g[g.length-1],st=String(pick(ult,'status')||'').trim();
+  return st||'Pendente';
+}
+function doDup(){
+  var cab=['Nome','E-mail institucional','E-mail pessoal','CPF','Escola','Cargo','Qtd de envios','Primeiro envio','Ultimo envio','Status','Observacao'];
+  var out=[];
+  dupGrupos.forEach(function(g){
+    if(g.length<2)return;
+    var u=g[g.length-1];
+    var escola=pick(u,'escola');
+    if(!escola){var trab=pick(u,'trabalha');if(trab&&normHeaderD(trab).indexOf('sede')>=0)escola='Sede da SEDUC';}
+    var st=statusFinalGrupo(g);
+    var obs=st==='Liberado'?'Acesso liberado - avisar o servidor':(/nao liberado|n\u00e3o liberado/i.test(st)?'Acesso negado - ver motivo':'Aguardando liberacao');
+    out.push([pick(u,'nome'),pick(u,'emailInst'),pick(u,'emailPessoal'),pick(u,'cpf'),escola,(pick(u,'cargoPad')||pick(u,'cargo')),g.length,pick(g[0],'data'),pick(u,'data'),st,obs]);
+  });
+  if(!out.length){alert('Nenhum duplicado encontrado.');return;}
+  // liberados primeiro (sao os que a SEDUC precisa avisar)
+  out.sort(function(a,b){return (a[9]==='Liberado'?0:1)-(b[9]==='Liberado'?0:1);});
+  var csv=[cab].concat(out).map(function(row){return row.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}).join(';');}).join('\r\n');
+  var blob=new Blob([new Uint8Array([0xEF,0xBB,0xBF]),csv],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='devlith_duplicados_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
 function filtrar(rows){
   var mes=document.getElementById('fMes').value,de=document.getElementById('fDe').value,ate=document.getElementById('fAte').value;
-  if(!mes&&!de&&!ate)return rows;
-  return rows.filter(function(r){
+  var dup=document.getElementById('fDup').checked;
+  if(!mes&&!de&&!ate&&!dup)return rows;
+  var res=rows.filter(function(r){
+    if(dup&&tamGrupo(r)<2)return false;
+    if(!mes&&!de&&!ate)return true;
     var dt=parseDataBR(pick(r,'data'));
     if(!dt)return false;
     if(mes)return chaveMes(dt)===mes;
@@ -260,6 +324,8 @@ function filtrar(rows){
     if(ate&&d>ate)return false;
     return true;
   });
+  if(dup)res=res.slice().sort(function(a,b){return a._g-b._g;});
+  return res;
 }
 
 function render(todas){
@@ -271,7 +337,7 @@ function render(todas){
     if(!escola){ var trab=pick(r,'trabalha'); if(trab && normHeaderD(trab).indexOf('sede')>=0) escola='Sede da SEDUC'; }
     var si=statusInfo(status);
     if(si.k==='lib')lib++;else if(si.k==='nao')nao++;else pend++;
-    return '<tr><td>'+esc(nome)+'</td><td>'+esc(escola)+'</td><td>'+esc(cargo)+'</td><td>'+esc(emailInst)+'</td><td>'+esc(emailPessoal)+'</td><td>'+esc(cpf)+'</td><td>'+esc(cep)+'</td><td>'+si.tag+'</td><td>'+esc(fmtData(data))+'</td></tr>';
+    return '<tr><td>'+esc(nome)+(tamGrupo(r)>1?' <span class="tag tag-wait" title="Cadastro duplicado">x'+tamGrupo(r)+'</span>':'')+'</td><td>'+esc(escola)+'</td><td>'+esc(cargo)+'</td><td>'+esc(emailInst)+'</td><td>'+esc(emailPessoal)+'</td><td>'+esc(cpf)+'</td><td>'+esc(cep)+'</td><td>'+si.tag+'</td><td>'+esc(fmtData(data))+'</td></tr>';
   }).join('');
 
   document.getElementById('kT').textContent=total;
