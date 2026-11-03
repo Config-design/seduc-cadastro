@@ -102,7 +102,7 @@ td{padding:9px 12px;vertical-align:middle;white-space:nowrap;}
       <div><label for="fAte">At&eacute;</label><input type="date" id="fAte" onchange="onDatas()"/></div>
       <div><label for="fDup">Duplicados</label><label class="chk"><input type="checkbox" id="fDup" onchange="render(linhas)"/> <span id="fDupTxt">S&oacute; duplicados</span></label></div>
       <button class="bclr" onclick="limparFiltro()">Limpar filtro</button>
-      <button class="bclr" style="color:#B45309;border-color:#FCD34D;background:#FFFBEB;" onclick="doDupPdf()">&#11015; Relat&oacute;rio de duplicados (PDF)</button>
+      <button class="bclr" style="color:#B45309;border-color:#FCD34D;background:#FFFBEB;" onclick="doDupPdf()">&#11015; Relat&oacute;rio PDF (duplicados e n&atilde;o liberados)</button>
       <button class="bclr" onclick="doDup()">Excel</button>
       <div class="fcount" id="fCount"></div>
     </div>
@@ -319,45 +319,106 @@ function carregarScript_(url){
   return new Promise(function(ok,err){var s=document.createElement('script');s.src=url;s.onload=ok;s.onerror=function(){err(new Error(url));};document.head.appendChild(s);});
 }
 function doDupPdf(){
-  var out=montarDuplicados();
-  if(!out.length){alert('Nenhum duplicado encontrado.');return;}
+  if(!linhas.length){alert('Nenhum dado para gerar o relatorio.');return;}
   var pronto=window.jspdf&&window.jspdf.jsPDF&&window.jspdf.jsPDF.API&&window.jspdf.jsPDF.API.autoTable;
   var carregar=pronto?Promise.resolve():carregarScript_('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js').then(function(){return carregarScript_('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js');});
-  carregar.then(function(){gerarPdfDup_(out);}).catch(function(){alert('Nao foi possivel carregar o gerador de PDF. Verifique a internet e tente de novo.');});
+  carregar.then(function(){gerarPdfDup_();}).catch(function(e){console.error(e);alert('Nao foi possivel gerar o PDF. Verifique a internet e tente de novo.');});
 }
-function gerarPdfDup_(out){
+
+// Mensagens enviadas por e-mail nos dois motivos de "Nao liberado" (iguais as do Codigo.gs)
+var MSG_NEG_EMAIL='Atenção, verifique seu e-mail institucional com o setor de DITEI da SEDUC. Seu e-mail está sendo ultilizado por outro usuário já cadastrado no sistema do diário online (Devlith), Esse usuário contém o mesmo nome inicial e final igual ao seu, então será necessário a criação de um nome e-mail insticional para você';
+var MSG_NEG_DADOS='Revise seus dados e nos envie novamente com as informações corretas. Nome completo, Escola, Cargo, E-mail institucional, CPF, CEP, E-mail pessoal. Caso prefira, peça para algum servidor de sua unidade escolar entrar em contato conosco através do chat, informando seus dados corretamente, para que possamos verificar a situação e lhe ajudar.';
+
+function escolaDe_(r){
+  var e=pick(r,'escola');
+  if(!e){var t=pick(r,'trabalha');if(t&&normHeaderD(t).indexOf('sede')>=0)e='Sede da SEDUC';}
+  return e;
+}
+// Nao liberados (uma linha por pessoa), separados por motivo. Quem ja tem outro cadastro liberado fica de fora.
+function listaNaoLiberados_(){
+  var email=[],dados=[],visto={},omitidos=0;
+  linhas.forEach(function(r,idx){
+    var chave=r._g>=0?'g'+r._g:'r'+idx;
+    if(visto[chave])return;visto[chave]=1;
+    var g=r._g>=0?dupGrupos[r._g]:[r];
+    var u=g[g.length-1];
+    var temNao=g.some(function(x){return statusInfo(pick(x,'status')).k==='nao';});
+    if(!temNao)return;
+    var st=statusFinalGrupo(g);
+    if(st==='Liberado'){omitidos++;return;}
+    if(statusInfo(pick(u,'status')).k!=='nao')return; // reenviou e ainda esta pendente
+    var linha=[pick(u,'nome'),pick(u,'emailInst'),pick(u,'emailPessoal'),pick(u,'cpf'),escolaDe_(u),String(pick(u,'data')||'').slice(0,10)];
+    (normHeaderD(pick(u,'status')).indexOf('mail')>=0?email:dados).push(linha);
+  });
+  return {email:email,dados:dados,omitidos:omitidos};
+}
+
+function gerarPdfDup_(){
   var doc=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   var hoje=new Date().toLocaleDateString('pt-BR');
-  var lib=out.filter(function(r){return r[9]==='Liberado';});
-  var dem=out.filter(function(r){return r[9]!=='Liberado';});
-  doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(27,79,155);
-  doc.text('Devlith Educa - Cadastros duplicados',14,16);
-  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(100,116,139);
-  doc.text('Prefeitura de Araruama  |  Gerado em '+hoje+'  |  '+out.length+' pessoas com mais de um cadastro ('+lib.length+' com acesso liberado)',14,22);
-  doc.text('Criterio: mesmo CPF ou mesmo e-mail institucional. A pessoa pode nao ter visto o e-mail com o acesso.',14,27);
+  var dup=montarDuplicados();
+  var dupLib=dup.filter(function(r){return r[9]==='Liberado';});
+  var dupNao=dup.filter(function(r){return r[9]!=='Liberado';});
+  var nl=listaNaoLiberados_();
+  var VERDE=[22,163,74],LARANJA=[180,83,9],VERMELHO=[185,28,28],AZUL=[27,79,155];
 
-  var colunas=[['Nome','E-mail institucional','E-mail pessoal','CPF','Escola','Envios','Status']];
-  var estilos={0:{cellWidth:42},1:{cellWidth:48},2:{cellWidth:48},3:{cellWidth:26},4:{cellWidth:46},5:{cellWidth:24},6:{cellWidth:35}};
-  function linhas(arr){return arr.map(function(r){
-    var d=function(v){return String(v||'').slice(0,10);};
-    return [r[0],r[1],r[2],r[3],r[4],r[6]+' envios\n'+d(r[7])+' a '+d(r[8]),r[9]];
-  });}
-  var y=33;
-  function secao(titulo,cor,arr){
-    if(!arr.length)return;
-    doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(cor[0],cor[1],cor[2]);
-    if(y>180){doc.addPage();y=16;}
-    doc.text(titulo+' ('+arr.length+')',14,y);
-    doc.autoTable({startY:y+3,head:colunas,body:linhas(arr),theme:'grid',margin:{left:14,right:14,bottom:14},
+  doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(AZUL[0],AZUL[1],AZUL[2]);
+  doc.text('Devlith Educa - Relatório de cadastros',14,16);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(100,116,139);
+  doc.text('Prefeitura de Araruama  |  Gerado em '+hoje+'  |  '+linhas.length+' cadastros no total',14,22);
+  doc.text('Duplicado = mesmo CPF ou mesmo e-mail institucional. A pessoa pode não ter visto o e-mail com o resultado.',14,27);
+
+  var y=34;
+  function espaco(h){if(y+h>192){doc.addPage();y=16;}}
+  function titulo(txt,cor){espaco(24);doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(cor[0],cor[1],cor[2]);doc.text(txt,14,y);y+=3;}
+  function rodape(){var n=doc.internal.getCurrentPageInfo().pageNumber;doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(148,163,184);doc.text('Página '+n,283,205,{align:'right'});}
+  function tabela(cab,corpo,cor,larguras){
+    var estilos={};larguras.forEach(function(w,i){estilos[i]={cellWidth:w};});
+    doc.autoTable({startY:y,head:[cab],body:corpo,theme:'grid',margin:{left:14,right:14,bottom:14},
       styles:{font:'helvetica',fontSize:7.5,cellPadding:1.6,overflow:'linebreak',lineColor:[226,232,240],lineWidth:0.2,textColor:[30,41,59]},
-      headStyles:{fillColor:cor,textColor:255,fontStyle:'bold'},
-      alternateRowStyles:{fillColor:[246,244,249]},columnStyles:estilos,
-      didDrawPage:function(){var n=doc.internal.getNumberOfPages();doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(148,163,184);doc.text('Pagina '+doc.internal.getCurrentPageInfo().pageNumber,283,205,{align:'right'});}});
-    y=doc.lastAutoTable.finalY+10;
+      headStyles:{fillColor:cor,textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[246,244,249]},columnStyles:estilos,didDrawPage:rodape});
+    y=doc.lastAutoTable.finalY+9;
   }
-  secao('Acesso liberado - avisar o servidor',[22,163,74],lib);
-  secao('Demais casos (negado ou aguardando)',[180,83,9],dem);
-  doc.save('devlith_duplicados_'+new Date().toISOString().slice(0,10)+'.pdf');
+  function vazio(txt){doc.setFont('helvetica','italic');doc.setFontSize(9);doc.setTextColor(100,116,139);doc.text(txt,14,y+4);y+=12;}
+  var cabDup=['Nome','E-mail institucional','E-mail pessoal','CPF','Escola','Envios','Status'];
+  var largDup=[42,48,48,26,46,24,35];
+  function linhasDup(arr){return arr.map(function(r){var d=function(v){return String(v||'').slice(0,10);};return [r[0],r[1],r[2],r[3],r[4],r[6]+' envios\n'+d(r[7])+' a '+d(r[8]),r[9]];});}
+  var cabNao=['Nome','E-mail institucional','E-mail pessoal','CPF','Escola','Cadastro em'];
+  var largNao=[48,52,52,28,55,34];
+
+  // resumo
+  espaco(30);
+  doc.autoTable({startY:y,head:[['Resumo','Pessoas']],theme:'grid',margin:{left:14},tableWidth:110,
+    body:[['1. Duplicados com acesso liberado',dupLib.length],['2. Duplicados não liberados / aguardando',dupNao.length],['3. Não liberados - motivo E-mail',nl.email.length],['4. Não liberados - motivo Dados',nl.dados.length]],
+    styles:{font:'helvetica',fontSize:8.5,cellPadding:1.8},headStyles:{fillColor:AZUL,textColor:255},didDrawPage:rodape});
+  y=doc.lastAutoTable.finalY+10;
+
+  titulo('1. Duplicados com acesso liberado - avisar o servidor ('+dupLib.length+')',VERDE);
+  if(dupLib.length)tabela(cabDup,linhasDup(dupLib),VERDE,largDup);else vazio('Nenhum.');
+
+  titulo('2. Duplicados não liberados ou aguardando ('+dupNao.length+')',LARANJA);
+  if(dupNao.length)tabela(cabDup,linhasDup(dupNao),LARANJA,largDup);else vazio('Nenhum.');
+
+  function blocoMotivo(rotulo,msg,arr){
+    doc.setFont('helvetica','normal');doc.setFontSize(9);
+    var linhasMsg=doc.splitTextToSize(msg,258);
+    var h=linhasMsg.length*4.4+10;
+    espaco(h+40); // titulo + mensagem + inicio da tabela ficam juntos
+    titulo(rotulo+' ('+arr.length+')',VERMELHO);
+    doc.setFillColor(254,242,242);doc.setDrawColor(252,165,165);doc.roundedRect(14,y,269,h,2,2,'FD');
+    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(VERMELHO[0],VERMELHO[1],VERMELHO[2]);
+    doc.text('Mensagem enviada por e-mail (pode copiar e colar):',17,y+5);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(30,41,59);
+    doc.text(linhasMsg,17,y+10);
+    y+=h+3;
+    if(arr.length)tabela(cabNao,arr,VERMELHO,largNao);else vazio('Nenhum.');
+  }
+  blocoMotivo('3. Não liberados - motivo: E-mail institucional em uso',MSG_NEG_EMAIL,nl.email);
+  blocoMotivo('4. Não liberados - motivo: Dados incorretos',MSG_NEG_DADOS,nl.dados);
+
+  if(nl.omitidos){espaco(10);doc.setFont('helvetica','italic');doc.setFontSize(8);doc.setTextColor(100,116,139);
+    doc.text('Obs.: '+nl.omitidos+' pessoa(s) tiveram um cadastro negado, mas já possuem outro cadastro liberado e não aparecem nas seções 3 e 4.',14,y);}
+  doc.save('devlith_relatorio_cadastros_'+new Date().toISOString().slice(0,10)+'.pdf');
 }
 
 function filtrar(rows){
